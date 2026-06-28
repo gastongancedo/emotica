@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emotica · Juego de cartas de educación emocional para niños</title>
+<meta name="description" content="Emotica es un juego de cartas de educación emocional para niños de 4 a 8 años. Jugá en familia, en la escuela o en terapia. Con respaldo pedagógico y psicológico.">
+<meta property="og:title" content="Emotica · Jugá, sentí y aprendé">
+<meta property="og:description" content="Juego de cartas de educación emocional para niños de 4 a 8 años.">
+<meta property="og:type" content="website">
+<link rel="icon" href="images/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+
+<!-- Announcement -->
+<div class="announce">🚚 Envío gratis en CABA y GBA a partir de $50.000 · Comprá hoy y recibilo en 48-72 hs</div>
+
+<!-- Header -->
+<header class="header" id="top">
+  <div class="container header__inner">
+    <a href="#top" class="brand"><img src="images/logo-horizontal.svg" alt="Emotica" class="brand__logo"></a>
+    <nav class="nav" id="nav">
+      <a href="#juego">El juego</a>
+      <a href="#como">Cómo se juega</a>
+      <a href="#tito">Tito</a>
+      <a href="#beneficios">Beneficios</a>
+      <a href="#faq">Preguntas</a>
+      <a href="#comprar" class="nav__cta">Comprar</a>
+    </nav>
+    <div class="header__actions">
+      <button class="cart-btn" id="openCart" aria-label="Abrir carrito">
+        🛒 <span class="cart-btn__count" id="cartCount">0</span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menú">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <img class="hero__bg" src="images/hero.jpg" alt="Familia jugando con Emotica">
+  <div class="hero__scrim"></div>
+  <div class="container hero__content">
+    <div class="hero__text">
+      <span class="pill">Educación emocional para jugar en familia</span>
+      <h1>Jugá, sentí y<br>aprendé con <span class="grad">Emotica</span></h1>
+      <p>Un juego de cartas que ayuda a los niños de 4 a 8 años a reconocer y expresar sus emociones, con respaldo pedagógico y psicológico.</p>
+      <div class="hero__btns">
+        <a href="#comprar" class="btn btn--primary">Comprar ahora</a>
+        <a href="#juego" class="btn btn--ghost btn--on-img">Ver el juego</a>
+      </div>
+      <div class="hero__meta">
+        <span>⭐ 4,9 / 5</span><span>·</span><span>+500 familias jugando</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust strip -->
+<section class="trust">
+  <div class="container trust__grid">
+    <div class="trust__item"><span>🧠</span><strong>Respaldo pedagógico</strong><p>Creado con psicólogos y psicopedagogos.</p></div>
+    <div class="trust__item"><span>👨‍👩‍👧</span><strong>Para toda la familia</strong><p>Fortalece el vínculo jugando juntos.</p></div>
+    <div class="trust__item"><span>♻️</span><strong>Materiales durables</strong><p>Cartas plastificadas y sustentables.</p></div>
+    <div class="trust__item"><span>🚚</span><strong>Envíos a todo el país</strong><p>Comprá online y recibilo en casa.</p></div>
+  </div>
+</section>
+
+<!-- Producto -->
+<section class="product" id="juego">
+  <div class="container product__inner">
+    <div class="product__gallery">
+      <div class="ph ph--main" data-label="Foto: mazo Emotica">
+        <img src="images/producto.jpg" alt="Mazo base Emotica" onerror="this.style.display='none'">
+      </div>
+      <div class="product__thumbs">
+        <div class="ph ph--thumb"><img src="images/producto.jpg" alt="Mazo Emotica" onerror="this.style.display='none'"></div>
+        <div class="ph ph--thumb"><img src="images/miedos.jpg" alt="Cartas Emotica" onerror="this.style.display='none'"></div>
+        <div class="ph ph--thumb"><img src="images/enojo.jpg" alt="Detalle de cartas" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+    <div class="product__info">
+      <span class="eyebrow">Mazo base · Edición lanzamiento</span>
+      <h2>Emotica — Mazo base</h2>
+      <div class="rating">★★★★★ <span>(128 reseñas)</span></div>
+      <p class="product__desc">El juego original de Emotica: cartas con emociones para que los más chicos aprendan a identificarlas, expresarlas y conversar sobre ellas. Ideal para el hogar, la escuela y la terapia.</p>
+      <ul class="product__list">
+        <li>✔️ 48 cartas ilustradas + guía para adultos</li>
+        <li>✔️ Recomendado para niños de 4 a 8 años</li>
+        <li>✔️ Cartulina plastificada con bordes redondeados</li>
+        <li>✔️ Se juega individual o en grupo</li>
+      </ul>
+      <div class="price-row">
+        <div class="price">$36.400 <small>ARS</small></div>
+        <span class="installments">3 cuotas sin interés de $12.133</span>
+      </div>
+      <div class="buy" id="comprar">
+        <div class="qty">
+          <button class="qty__btn" data-act="dec" aria-label="Restar">−</button>
+          <input class="qty__input" id="qty" value="1" inputmode="numeric" aria-label="Cantidad">
+          <button class="qty__btn" data-act="inc" aria-label="Sumar">+</button>
+        </div>
+        <button class="btn btn--primary btn--lg" id="addToCart">Agregar al carrito</button>
+      </div>
+      <p class="ship-note">🔒 Pago seguro · 💳 Visa, Mastercard y Mercado Pago · 🔁 Cambios sin cargo</p>
+    </div>
+  </div>
+</section>
+
+<!-- Cómo se juega -->
+<section class="how" id="como">
+  <div class="container">
+    <h2 class="section-title">Cómo se juega</h2>
+    <p class="section-sub">Tres pasos simples para empezar a conversar sobre emociones.</p>
+    <div class="how__wrap">
+      <div class="how__img"><img src="images/tito-carta.jpg" alt="Tito mostrando una carta de emociones"></div>
+      <div class="how__grid">
+        <div class="how__step"><span class="how__num">1</span><h3>Repartí las cartas</h3><p>Cada jugador recibe cartas con distintas emociones ilustradas.</p></div>
+        <div class="how__step"><span class="how__num">2</span><h3>Contá qué sentís</h3><p>Por turnos, cada uno comparte una situación donde sintió esa emoción.</p></div>
+        <div class="how__step"><span class="how__num">3</span><h3>Aprendé jugando</h3><p>Entre todos descubren que todas las emociones son válidas.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Conocé a Tito -->
+<section class="tito" id="tito">
+  <img class="tito__bg" src="images/tito-banner.jpg" alt="Tito jugando a las emociones con un niño">
+  <div class="container tito__content">
+    <div class="tito__text">
+      <span class="eyebrow">Conocé a Tito</span>
+      <h2>El monstruo de<br>las emociones</h2>
+      <p>Tito es el personaje de Emotica que acompaña a los chicos a reconocer y expresar lo que sienten. Con él, hablar de emociones se vuelve un juego.</p>
+      <a class="btn btn--primary" href="#comprar">Jugar con Tito</a>
+    </div>
+  </div>
+</section>
+
+<!-- Beneficios / para quién -->
+<section class="audience" id="beneficios">
+  <div class="container">
+    <h2 class="section-title">Pensado para acompañar</h2>
+    <p class="section-sub">Una sola herramienta, muchos contextos.</p>
+    <div class="audience__grid">
+      <article class="acard acard--1"><span>🏠</span><h3>Familias</h3><p>Un momento de juego que fortalece el vínculo y abre la conversación emocional en casa.</p></article>
+      <article class="acard acard--2"><span>🏫</span><h3>Escuelas</h3><p>Un recurso lúdico para trabajar habilidades socioemocionales en el aula.</p></article>
+      <article class="acard acard--3"><span>💬</span><h3>Terapia</h3><p>Una ayuda para que psicólogos y psicopedagogos trabajen las emociones jugando.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonios -->
+<section class="reviews">
+  <div class="container">
+    <h2 class="section-title">Lo que dicen las familias</h2>
+    <div class="reviews__grid">
+      <blockquote class="review">
+        <div class="review__stars">★★★★★</div>
+        <p>"A mi hijo le costaba hablar de lo que sentía. Con Emotica ahora me cuenta todo jugando."</p>
+        <div class="review__author">
+          <img src="images/review-1.jpg" alt="Laura" onerror="this.style.display='none'">
+          <cite>Laura<span>mamá de Tomás (6)</span></cite>
+        </div>
+      </blockquote>
+      <blockquote class="review">
+        <div class="review__stars">★★★★★</div>
+        <p>"Lo uso en mis sesiones y los chicos lo aman. Súper bien pensado y de gran calidad."</p>
+        <div class="review__author">
+          <img src="images/review-2.jpg" alt="Ximena" onerror="this.style.display='none'">
+          <cite>Ximena<span>psicóloga infantil</span></cite>
+        </div>
+      </blockquote>
+      <blockquote class="review">
+        <div class="review__stars">★★★★★</div>
+        <p>"Ideal para el aula. Los materiales son durables y los diseños hermosos."</p>
+        <div class="review__author">
+          <img src="images/review-3.jpg" alt="Delfina" onerror="this.style.display='none'">
+          <cite>Delfina<span>docente de nivel inicial</span></cite>
+        </div>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- Vínculo con Tito -->
+<section class="bond">
+  <div class="container bond__inner">
+    <div class="bond__img"><img src="images/tito-abrazo.jpg" alt="Tito abrazando a un niño"></div>
+    <div class="bond__text">
+      <h2>Más que un juego,<br>un momento juntos</h2>
+      <p>Emotica y Tito crean un espacio seguro para que los chicos se animen a hablar de lo que sienten, acompañados por quienes más quieren.</p>
+      <a class="btn btn--primary" href="#comprar">Quiero jugar en casa</a>
+    </div>
+  </div>
+</section>
+
+<!-- Próximamente -->
+<section class="soon">
+  <div class="container">
+    <h2 class="section-title">Próximamente: expansiones</h2>
+    <p class="section-sub">El universo Emotica sigue creciendo.</p>
+    <div class="soon__grid">
+      <div class="scard"><span class="badge">Pronto</span><div class="ph ph--soon"><img src="images/miedos.jpg" alt="Expansión Miedos" onerror="this.style.display='none'"></div><h3>Expansión · Miedos y valentía</h3></div>
+      <div class="scard"><span class="badge">Pronto</span><div class="ph ph--soon"><img src="images/enojo.jpg" alt="Expansión Enojo" onerror="this.style.display='none'"></div><h3>Expansión · Enojo y calma</h3></div>
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter -->
+<section class="news">
+  <div class="container news__inner">
+    <div>
+      <h2>Sumate a la comunidad Emotica</h2>
+      <p>Tips de educación emocional y novedades en tu mail.</p>
+    </div>
+    <form class="news__form" id="newsForm">
+      <input type="email" placeholder="tu@email.com" required aria-label="Email">
+      <button class="btn btn--accent" type="submit">Suscribirme</button>
+    </form>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="container faq__inner">
+    <h2 class="section-title">Preguntas frecuentes</h2>
+    <div class="acc">
+      <details><summary>¿A partir de qué edad es?</summary><p>Está pensado para niños de 4 a 8 años, jugando siempre acompañados por un adulto.</p></details>
+      <details><summary>¿Cómo son los envíos?</summary><p>Enviamos a todo el país. En CABA y GBA llega en 48-72 hs; al interior, según el correo elegido. Envío gratis en CABA/GBA superando $50.000.</p></details>
+      <details><summary>¿De qué material son las cartas?</summary><p>Cartulina plastificada con bordes redondeados: durable, segura y sustentable.</p></details>
+      <details><summary>¿Puedo cambiarlo?</summary><p>Sí, tenés cambios sin cargo dentro de los 30 días si el producto está en buen estado.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand">
+      <img src="images/logo-horizontal.svg" alt="Emotica" class="footer__logo">
+      <p>Educación emocional para jugar y crecer en familia.</p>
+      <p class="footer__pay">💳 Visa · Mastercard · Mercado Pago</p>
+    </div>
+    <div class="footer__col"><h4>Producto</h4><a href="#juego">Mazo base</a><a href="#">Expansiones</a><a href="#">Para escuelas</a></div>
+    <div class="footer__col"><h4>Ayuda</h4><a href="#faq">Envíos y pagos</a><a href="#faq">Cambios</a><a href="#faq">Preguntas frecuentes</a></div>
+    <div class="footer__col"><h4>Seguinos</h4><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Newsletter</a></div>
+  </div>
+  <div class="footer__bottom">© 2026 Emotica · Hecho con 💚 en Argentina</div>
+</footer>
+
+<!-- Mascota flotante -->
+<a class="mascot" href="#tito" aria-label="Conocé a Tito"><img src="images/tito-hola.jpg" alt="Tito"></a>
+
+<!-- WhatsApp flotante -->
+<a class="wa" href="https://wa.me/5491112345678?text=Hola!%20Quiero%20consultar%20sobre%20Emotica" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
+  <svg viewBox="0 0 32 32" fill="#fff" aria-hidden="true"><path d="M16.04 4C9.46 4 4.1 9.36 4.1 15.94c0 2.1.55 4.16 1.6 5.98L4 28l6.25-1.64a11.9 11.9 0 0 0 5.79 1.48h.01c6.58 0 11.94-5.36 11.94-11.94C28 9.36 22.62 4 16.04 4zm0 21.84h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.71.97.99-3.62-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.46 4.45-9.9 9.92-9.9 2.65 0 5.14 1.03 7.01 2.9a9.84 9.84 0 0 1 2.9 7.01c0 5.46-4.45 9.9-9.9 9.9zm5.44-7.42c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.21 5.1 4.5.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35z"/></svg>
+</a>
+
+<!-- Cart drawer -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="Carrito">
+  <div class="drawer__head">
+    <h3>Tu carrito</h3>
+    <button id="closeCart" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="drawer__items" id="cartItems"></div>
+  <div class="drawer__empty" id="cartEmpty">Tu carrito está vacío 🛒</div>
+  <div class="drawer__foot">
+    <div class="drawer__total"><span>Subtotal</span><strong id="cartTotal">$0</strong></div>
+    <button class="btn btn--primary btn--lg btn--block" id="checkout">Finalizar compra</button>
+    <p class="drawer__note">Los impuestos y envíos se calculan en el checkout.</p>
+  </div>
+</aside>
+
+<script src="script.js"></script>
+</body>
+</html>
