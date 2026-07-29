@@ -29,7 +29,12 @@
 
   --r:3px;
   --shadow:0 1px 2px rgba(20,20,26,.05),0 8px 24px -16px rgba(20,20,26,.22);
+
+  --topbar-h:56px;
+  --pad:22px;
 }
+@media (max-width:940px){ :root{ --topbar-h:52px } }
+@media (max-width:560px){ :root{ --pad:15px } }
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#0A0A0D; --bg-panel:#15151B; --bg-sunk:#101016;
@@ -70,11 +75,14 @@
 }
 
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
   margin:0;background:var(--bg);color:var(--fg);
   font-family:var(--sans);font-size:15.5px;line-height:1.62;
   -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
+img,svg{max-width:100%}
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms!important;transition-duration:.001ms!important}
 }
@@ -95,15 +103,16 @@ a{color:inherit}
 strong{font-weight:670}
 
 /* ---------- shell ---------- */
-.shell{max-width:1280px;margin:0 auto;padding:0 22px}
+.shell{max-width:1280px;margin:0 auto;padding:0 var(--pad)}
 
 .topbar{
   position:sticky;top:0;z-index:60;background:var(--bg);
   border-bottom:1px solid var(--line);
 }
 .topbar__in{
-  max-width:1280px;margin:0 auto;padding:13px 22px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  max-width:1280px;margin:0 auto;padding:13px var(--pad);
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  min-height:var(--topbar-h);
 }
 .brand{display:flex;align-items:center;gap:11px;min-width:0}
 .brand__word{
@@ -117,9 +126,15 @@ strong{font-weight:670}
   padding-left:11px;margin-left:2px;border-left:1px solid var(--line-strong);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.crew{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-muted)}
+.crew{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-muted);white-space:nowrap}
 .crew b{font-weight:600;color:var(--fg)}
-@media (max-width:720px){.brand__sub,.crew{display:none}}
+@media (max-width:860px){.brand__sub{display:none}}
+@media (max-width:560px){
+  .crew span{display:none}
+  .brand svg{width:22px;height:22px}
+  .brand__word{font-size:12.5px}
+  .crew{font-size:10px}
+}
 
 /* ---------- hero ---------- */
 .hero{padding:52px 0 6px}
@@ -159,8 +174,19 @@ strong{font-weight:670}
 .lg{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-muted)}
 .lg i{width:9px;height:9px;border-radius:1px;display:block}
 .meters{
-  display:flex;gap:3px;align-items:flex-end;height:112px;
-  overflow-x:auto;padding-bottom:4px;
+  display:flex;gap:3px;align-items:flex-end;height:150px;
+  overflow-x:auto;overflow-y:hidden;
+  /* overflow-x:auto fuerza overflow-y:auto, así que el tooltip
+     necesita vivir dentro de la caja o queda recortado */
+  padding:38px 0 4px;
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+  background-image:
+    linear-gradient(to left,var(--bg-panel),rgba(0,0,0,0)),
+    linear-gradient(to left,rgba(0,0,0,.18),rgba(0,0,0,0));
+  background-position:right center,right center;
+  background-repeat:no-repeat;
+  background-size:24px 100%,12px 100%;
+  background-attachment:local,scroll;
 }
 .ch{flex:1 1 0;min-width:20px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:6px;position:relative}
 .ch__bar{
@@ -178,12 +204,18 @@ strong{font-weight:670}
 .ch[data-s="crit"] .ch__bar{background:var(--st-crit-bg);border-top-color:var(--st-crit)}
 .ch:hover .ch__lab{color:var(--fg)}
 .ch__tip{
-  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
   background:var(--fg);color:var(--bg);font-family:var(--mono);font-size:10px;
   padding:5px 8px;border-radius:2px;white-space:nowrap;opacity:0;pointer-events:none;
   transition:opacity .14s;z-index:5;letter-spacing:.02em;
 }
-.ch:hover .ch__tip,.ch:focus-within .ch__tip{opacity:1}
+.ch:hover .ch__tip,.ch:focus .ch__tip,.ch:focus-within .ch__tip{opacity:1}
+@media (max-width:760px){
+  .meters{height:132px;padding-top:34px}
+  .ch{min-width:17px}
+  .ch__lab{font-size:8px}
+  .ch__tip{font-size:9.5px;padding:4px 7px}
+}
 
 /* ---------- alert ---------- */
 .alert{
@@ -197,23 +229,45 @@ strong{font-weight:670}
 .alert p b{color:var(--fg)}
 
 /* ---------- layout: rail + main ---------- */
-.body{display:grid;grid-template-columns:214px 1fr;gap:44px;margin-top:64px;align-items:start}
-@media (max-width:940px){.body{grid-template-columns:1fr;gap:0}}
+/* minmax(0,1fr) + min-width:0 — sin esto los items de grilla toman
+   min-width:auto y las tablas anchas estiran la columna en vez de
+   deslizarse dentro de su contenedor */
+.body{display:grid;grid-template-columns:214px minmax(0,1fr);gap:44px;margin-top:64px;align-items:start}
+.body > *{min-width:0}
+.sec,.prose,.card,.note,.strip,.hero{min-width:0}
 
-.rail{position:sticky;top:70px}
-@media (max-width:940px){
-  .rail{position:static;margin-bottom:36px;border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--bg-panel)}
-}
+.rail{position:sticky;top:calc(var(--topbar-h) + 14px)}
 .rail__t{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-faint);margin-bottom:12px}
 .rail a{
   display:flex;align-items:baseline;gap:9px;padding:6px 0;text-decoration:none;
-  color:var(--fg-muted);font-size:13.5px;border-bottom:1px solid transparent;transition:color .15s;
+  color:var(--fg-muted);font-size:13.5px;transition:color .15s;
 }
 .rail a:hover,.rail a:focus-visible{color:var(--fg)}
 .rail a span{font-family:var(--mono);font-size:10px;color:var(--fg-faint);min-width:26px;letter-spacing:.03em}
 
+/* Bajo 940px el índice deja de ser una columna y pasa a ser
+   una tira de chips horizontal, fija bajo la barra superior. */
+@media (max-width:940px){
+  .body{grid-template-columns:1fr;gap:0;margin-top:44px}
+  .rail{
+    position:sticky;top:var(--topbar-h);z-index:50;
+    margin:0 calc(var(--pad) * -1) 34px;padding:9px var(--pad);
+    background:var(--bg);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .rail::-webkit-scrollbar{display:none}
+  .rail__t{display:none}
+  .rail a{
+    flex:0 0 auto;padding:6px 11px;border:1px solid var(--line-strong);border-radius:99px;
+    font-size:12.5px;white-space:nowrap;background:var(--bg-panel);
+  }
+  .rail a span{min-width:0;color:var(--signal);font-weight:600}
+}
+
 /* ---------- sections ---------- */
-.sec{scroll-margin-top:74px;padding-bottom:60px}
+.sec{scroll-margin-top:calc(var(--topbar-h) + 18px);padding-bottom:60px}
+@media (max-width:940px){ .sec{scroll-margin-top:calc(var(--topbar-h) + 58px)} }
 .sec + .sec{border-top:1px solid var(--line);padding-top:52px}
 .sec__head{display:flex;flex-direction:column;gap:9px;margin-bottom:26px}
 .sec__meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -241,7 +295,8 @@ strong{font-weight:670}
 .card--sunk{background:var(--bg-sunk)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media (max-width:840px){.grid2,.grid3{grid-template-columns:1fr}}
+@media (max-width:1040px){.grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
 
 /* callout */
 .note{
@@ -255,20 +310,40 @@ strong{font-weight:670}
 .note p{margin:0;font-size:14.5px;color:var(--fg-muted);max-width:72ch}
 .note p b{color:var(--fg)}
 
-/* tables */
-.tw{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-panel)}
-table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+/* tables — el sombreado del borde aparece solo si queda contenido
+   hacia ese lado, así se ve que la tabla se puede deslizar */
+.tw{
+  overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-panel);
+  background-image:
+    linear-gradient(to right,var(--bg-panel),rgba(0,0,0,0)),
+    linear-gradient(to left,var(--bg-panel),rgba(0,0,0,0)),
+    linear-gradient(to right,rgba(0,0,0,.20),rgba(0,0,0,0)),
+    linear-gradient(to left,rgba(0,0,0,.20),rgba(0,0,0,0));
+  background-position:left center,right center,left center,right center;
+  background-repeat:no-repeat;
+  background-size:26px 100%,26px 100%,13px 100%,13px 100%;
+  background-attachment:local,local,scroll,scroll;
+  -webkit-overflow-scrolling:touch;
+}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:460px}
 th{
   text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--fg-faint);font-weight:600;
   padding:11px 14px;border-bottom:1px solid var(--line-strong);white-space:nowrap;
   background:var(--bg-panel);
 }
-td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--fg-muted);vertical-align:top}
+td{
+  padding:11px 14px;border-bottom:1px solid var(--line);color:var(--fg-muted);
+  vertical-align:top;
+  /* break-word y NO anywhere: anywhere reduce el min-content y hace que
+     la tabla se aplaste partiendo palabras en vez de deslizarse */
+  overflow-wrap:break-word;
+}
 tbody tr:last-child td{border-bottom:none}
 td b,td strong{color:var(--fg);font-weight:640}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .tag-v{font-family:var(--mono);font-size:11px;color:var(--signal);font-weight:600;white-space:nowrap}
+code{font-family:var(--mono);font-size:.92em;overflow-wrap:break-word}
 
 /* Q list — instrumentos */
 .qs{display:flex;flex-direction:column;gap:3px;counter-reset:none}
@@ -287,8 +362,15 @@ td b,td strong{color:var(--fg);font-weight:640}
 .blk__h b{color:var(--fg);font-weight:600}
 
 /* diagram */
-.dia{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;overflow-x:auto}
+.dia{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .dia pre.mermaid{background:none;margin:0;display:flex;justify-content:center;min-width:0}
+/* En pantallas chicas el diagrama se desliza en vez de encogerse:
+   achicado entra, pero no se lee. */
+@media (max-width:760px){
+  .dia{padding:14px}
+  .dia pre.mermaid{min-width:520px;justify-content:flex-start}
+  .dia pre.mermaid svg{max-width:none}
+}
 
 /* checklist */
 .chk{display:flex;flex-direction:column;gap:0}
@@ -303,6 +385,41 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:30px 0 60px;disp
 footer p{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
 
 :focus-visible{outline:2px solid var(--signal);outline-offset:2px;border-radius:2px}
+
+/* ============================================================
+   DENSIDAD EN PANTALLAS CHICAS
+   ============================================================ */
+@media (max-width:760px){
+  body{font-size:15px}
+  .hero{padding:36px 0 4px}
+  .hero__lede{font-size:15.5px;margin-top:16px}
+  .stats{margin-top:28px}
+  .stat{padding:14px 14px 13px}
+  .strip{margin-top:24px;padding:16px 16px 11px}
+  .strip__head{margin-bottom:15px;gap:12px}
+  .alert{margin-top:26px;padding:18px 17px}
+  .alert h3{font-size:17.5px}
+  .sec{padding-bottom:44px}
+  .sec + .sec{padding-top:38px}
+  .sec__head{margin-bottom:20px}
+  .card{padding:17px 17px}
+  .note{padding:13px 15px}
+  .dia{padding:14px}
+  table{font-size:13px}
+  th{padding:9px 11px}
+  td{padding:9px 11px}
+  .q{padding:8px 0}
+  .q__n{min-width:30px}
+  .q__b p{font-size:14px}
+  footer{padding:24px 0 46px}
+}
+@media (max-width:430px){
+  .stats{grid-template-columns:1fr 1fr}
+  .stat__l{font-size:9.5px;letter-spacing:.1em}
+  .q{gap:9px}
+  .q__n{min-width:27px;font-size:10px}
+  .blk__h{flex-direction:column;gap:3px}
+}
 </style>
 
 <div class="topbar">
@@ -357,7 +474,7 @@ footer p{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-tran
         <div>
           <div class="eyebrow" style="margin-bottom:5px">Avance por subsección</div>
           <p style="font-size:13.5px;color:var(--fg-muted);max-width:52ch">
-            Altura = avance estimado. Pasá el mouse por cada canal.
+            Altura = avance estimado. Tocá cada canal para ver cuál es.
           </p>
         </div>
         <div class="strip__legend">
