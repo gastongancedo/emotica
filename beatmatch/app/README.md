@@ -64,6 +64,13 @@ todo lo necesario.
 
 ---
 
+## Poner esto online
+
+Guía paso a paso en **[DEPLOY.md](./DEPLOY.md)**: Supabase primero, Vercel
+después, con las variables exactas y la checklist de verificación.
+
+---
+
 ## Conectar Supabase
 
 La app habla con una interfaz (`src/lib/db/index.ts`) que tiene dos
@@ -81,7 +88,16 @@ ADMIN_KEY=algo-que-no-sea-beatmatch
 NEXT_PUBLIC_SITE_URL=https://tu-dominio
 ```
 
-4. Reiniciar. La barra naranja desaparece: ya está usando Postgres.
+4. Comprobar que quedó bien cerrada:
+
+```bash
+npm run verificar
+```
+
+   Verifica que las tablas existan y —lo importante— que la clave pública
+   **no pueda leer el mail ni el `edit_token`** de los DJs.
+
+5. Reiniciar. La barra naranja desaparece: ya está usando Postgres.
 
 > ⚠️ **`SUPABASE_SERVICE_ROLE_KEY` nunca lleva el prefijo `NEXT_PUBLIC_`.**
 > Todo lo que empieza con `NEXT_PUBLIC_` viaja al navegador, y esa clave
@@ -90,30 +106,47 @@ NEXT_PUBLIC_SITE_URL=https://tu-dominio
 ### Sobre las políticas de RLS
 
 Las políticas del `schema.sql` existen por si alguien usa la anon key
-directamente. Hay un detalle que conviene entender: **RLS filtra filas,
-no columnas.** La política de lectura pública deja ver la fila entera de
-un perfil publicado, incluidos `email` y `edit_token`.
+directamente. Hay un detalle que decide el diseño: **RLS filtra filas, no
+columnas.** Una política de lectura sobre `djs` dejaría ver la fila
+entera de un perfil publicado, incluidos `email` y `edit_token` — y con
+ese token cualquiera podría editar cualquier perfil.
 
-Por eso el esquema define la vista `djs_publicos`, que es lo único que
-debería consultar el navegador. La app no la usa —lee todo desde el
-servidor con la service role— pero está ahí para cuando haya consultas
-desde el cliente.
+Por eso el esquema no se apoya solo en RLS: revoca todo sobre `djs` y
+después otorga `select` **columna por columna**, dejando `email` y
+`edit_token` afuera. Eso es lo único que realmente impide leerlos con la
+anon key. `npm run verificar` comprueba exactamente eso.
 
 ---
 
 ## Probar que sigue funcionando
 
 ```bash
+rm -f data/beatmatch.json
 npm run build
-npx next start -p 3211 &
+BEATMATCH_ALMACEN=archivo ADMIN_KEY=beatmatch \
+  NEXT_PUBLIC_SITE_URL=http://localhost:3211 npx next start -p 3211 &
 node tests/flujos.mjs
 ```
 
-Recorre los 15 casos que importan: filtros, alta, validación del
+Recorre los 16 casos que importan: filtros, alta, validación del
 servidor, moderación, contacto, edición con token y rechazo de token
-inválido. Incluye dos que verifican que **el perfil público no filtre el
-mail ni el token de edición del DJ** — esa fue una fuga real que se
-encontró justamente con esta prueba.
+inválido. Tres verifican que **el perfil público no filtre el mail ni el
+token de edición del DJ** — esa fue una fuga real que se encontró
+justamente con esta prueba.
+
+> ⚠️ **Corré la prueba contra `next start`, no contra `next dev`.**
+>
+> El servidor de desarrollo instrumenta las lecturas de disco y mete el
+> contenido entero de `data/beatmatch.json` —mails y `edit_token` de todos
+> los perfiles— dentro del payload RSC de cualquier página que consulte la
+> base. Es un artefacto del modo dev y no ocurre en el build de
+> producción (está verificado en los 16 casos), pero implica una regla
+> operativa: **nunca expongas un `next dev` a internet.**
+
+`BEATMATCH_ALMACEN=archivo` existe solo para esto: permite el almacén de
+archivo en un build de producción local. En un deploy no va nunca — sin
+ella, la app se niega a arrancar en producción sin base de datos, en vez
+de aceptar perfiles y perderlos.
 
 ---
 
@@ -122,7 +155,8 @@ encontró justamente con esta prueba.
 - [ ] **Borrar los perfiles de ejemplo.** Un buscador con DJs inventados
       es lo que destruye la confianza de una productora. Vaciá
       `data/beatmatch.json` o rechazalos desde `/admin`.
-- [ ] Cambiar `ADMIN_KEY`.
+- [ ] Definir `ADMIN_KEY`. Sin la variable, en producción el panel queda
+      **cerrado** en lugar de caer a una clave por defecto adivinable.
 - [ ] Poner `NEXT_PUBLIC_SITE_URL` con el dominio real, o los links de
       edición van a salir apuntando a `localhost`.
 - [ ] Conectar Supabase. **En Vercel el filesystem es de solo lectura: el
@@ -154,8 +188,10 @@ src/
     ├── taxonomia.ts        estilos, ciudades, tramos de caché
     ├── validar.ts          validación del servidor
     └── types.ts
-supabase/schema.sql         tablas, índices, RLS y vista pública
-tests/flujos.mjs            recorrido de los 15 flujos
+supabase/schema.sql         tablas, índices, RLS y permisos por columna
+scripts/verificar-supabase.mjs  chequea que la base quedó bien cerrada
+tests/flujos.mjs            recorrido de los 16 flujos
+DEPLOY.md                   guía de Supabase + Vercel
 ```
 
 Los tramos de caché de `taxonomia.ts` son **los mismos de la P19 de la

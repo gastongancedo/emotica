@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "seed": "node scripts/seed.mjs"
+    "verificar": "node scripts/verificar-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.111.0",

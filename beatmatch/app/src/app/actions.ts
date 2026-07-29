@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { claveAdminValida } from "@/lib/admin";
 import { db } from "@/lib/db";
 import type { EstadoForm } from "@/lib/form-estado";
 import type { EstadoContacto, EstadoDj } from "@/lib/types";
@@ -133,10 +134,6 @@ export async function enviarContacto(
 }
 
 // ── Moderación ─────────────────────────────────────────────────────
-
-function claveAdminValida(clave: string): boolean {
-  return clave === (process.env.ADMIN_KEY ?? "beatmatch");
-}
 
 export async function moderarPerfil(fd: FormData): Promise<void> {
   const clave = String(fd.get("clave") ?? "");

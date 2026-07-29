@@ -1,9 +1,11 @@
 -- ═══════════════════════════════════════════════════════════════════
 -- BEATMATCH — esquema de la Fase 02
--- Pegar entero en el SQL Editor de Supabase y ejecutar.
+--
+-- Pegar entero en el SQL Editor de Supabase y ejecutar. Es idempotente:
+-- se puede correr más de una vez sin romper nada.
 -- ═══════════════════════════════════════════════════════════════════
 
-create extension if not exists "pgcrypto";
+-- gen_random_uuid() es núcleo desde PostgreSQL 13, no hace falta pgcrypto.
 
 -- ── DJs ────────────────────────────────────────────────────────────
 
@@ -11,7 +13,7 @@ create table if not exists public.djs (
   id                uuid primary key default gen_random_uuid(),
   slug              text unique not null,
   nombre_artistico  text not null,
-  -- Privado. Nunca se expone por la política de lectura pública.
+  -- Privado. Ver los permisos por columna más abajo.
   email             text not null,
   ciudad            text not null,
   bio               text not null default '',
@@ -25,6 +27,7 @@ create table if not exists public.djs (
   estado            text not null default 'pendiente'
                     check (estado in ('pendiente','publicado','rechazado','pausado')),
   -- Permite editar el perfil sin cuenta, vía link con token.
+  -- Es un secreto: quien lo tiene puede modificar el perfil.
   edit_token        text not null,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now(),
@@ -66,7 +69,11 @@ create index if not exists contactos_email_idx  on public.contactos (productora_
 -- ── updated_at automático ──────────────────────────────────────────
 
 create or replace function public.tocar_updated_at()
-returns trigger language plpgsql as $$
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $$
 begin
   new.updated_at = now();
   return new;
@@ -78,48 +85,58 @@ create trigger djs_updated_at
   for each row execute function public.tocar_updated_at();
 
 -- ═══════════════════════════════════════════════════════════════════
--- ROW LEVEL SECURITY
+-- SEGURIDAD
 --
 -- La app escribe siempre desde el servidor con la service role, que
--- saltea RLS. Estas políticas existen para que la anon key, que viaja
--- al navegador, no pueda hacer daño si alguien la usa directo.
+-- saltea RLS. Todo lo de abajo protege el caso en que alguien use la
+-- anon key directamente: es pública, viaja al navegador.
+--
+-- Punto clave: **RLS filtra FILAS, no COLUMNAS.** Una política de
+-- lectura sobre `djs` dejaría ver la fila entera de un perfil
+-- publicado, incluidos `email` y `edit_token`. Con el token, cualquiera
+-- podría editar cualquier perfil.
+--
+-- Por eso además de RLS hay permisos por columna: es lo único que
+-- impide leer esas dos columnas con la anon key.
 -- ═══════════════════════════════════════════════════════════════════
 
 alter table public.djs       enable row level security;
 alter table public.contactos enable row level security;
 
--- Cualquiera puede leer los perfiles publicados.
---
--- ⚠️ RLS filtra FILAS, no COLUMNAS: esta política deja ver también
--- `email` y `edit_token` de los perfiles publicados a quien use la
--- anon key. Para exponer datos al navegador hay que consultar la
--- vista `djs_publicos` de abajo, no la tabla.
+-- ── djs ────────────────────────────────────────────────────────────
+
+-- Se parte de cero y se otorga solo lo público, columna por columna.
+revoke all on public.djs from anon, authenticated;
+
+grant select (
+  id, slug, nombre_artistico, ciudad, bio, estilos,
+  cache_min, cache_max, instagram, set_url, foto_url, rider,
+  estado, created_at, updated_at
+) on public.djs to anon, authenticated;
+-- Quedan fuera a propósito: email, edit_token.
+
+-- Solo filas publicadas.
 drop policy if exists "lectura publica de perfiles publicados" on public.djs;
 create policy "lectura publica de perfiles publicados"
   on public.djs for select
+  to anon, authenticated
   using (estado = 'publicado');
 
--- Nadie escribe con la anon key. Las altas y ediciones pasan por el
--- servidor, que valida y usa la service role.
-drop policy if exists "sin escritura anonima en djs" on public.djs;
-create policy "sin escritura anonima en djs"
-  on public.djs for insert
-  with check (false);
+-- Sin políticas de insert/update/delete, RLS las deniega por defecto.
+-- Las altas y ediciones pasan por el servidor, que valida y usa la
+-- service role.
 
--- Los contactos no son públicos: contienen datos de la productora y el
--- presupuesto del evento.
-drop policy if exists "sin lectura anonima de contactos" on public.contactos;
-create policy "sin lectura anonima de contactos"
-  on public.contactos for select
-  using (false);
+-- ── contactos ──────────────────────────────────────────────────────
+-- Nada es público: hay datos de la productora y el presupuesto del
+-- evento. Sin grants y sin políticas, la anon key no puede tocarla.
 
-drop policy if exists "sin escritura anonima en contactos" on public.contactos;
-create policy "sin escritura anonima en contactos"
-  on public.contactos for insert
-  with check (false);
+revoke all on public.contactos from anon, authenticated;
 
 -- ── Vista pública ──────────────────────────────────────────────────
--- Esto es lo único que puede tocar el navegador con la anon key.
+-- Atajo cómodo para consultar desde el navegador. security_invoker
+-- hace que los permisos se evalúen como el usuario que consulta, así
+-- que hereda los grants por columna y la política de arriba: no es una
+-- puerta trasera.
 
 create or replace view public.djs_publicos
 with (security_invoker = true) as
@@ -133,7 +150,24 @@ with (security_invoker = true) as
 grant select on public.djs_publicos to anon, authenticated;
 
 -- ═══════════════════════════════════════════════════════════════════
--- Comprobación rápida
+-- Comprobaciones
 -- ═══════════════════════════════════════════════════════════════════
--- select count(*) from public.djs;
--- select * from public.djs_publicos limit 5;
+
+-- 1. Las dos tablas existen y están vacías:
+--    select count(*) from public.djs;
+--    select count(*) from public.contactos;
+
+-- 2. RLS activo en ambas (rls_enabled debe dar true en las dos):
+--    select relname, relrowsecurity as rls_enabled
+--    from pg_class
+--    where relname in ('djs','contactos');
+
+-- 3. anon NO puede leer email ni edit_token (debe devolver 0 filas):
+--    select column_name
+--    from information_schema.column_privileges
+--    where grantee = 'anon'
+--      and table_name = 'djs'
+--      and column_name in ('email','edit_token');
+
+-- Para el chequeo completo desde la app:
+--    node scripts/verificar-supabase.mjs

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 import { marcarContacto, moderarPerfil } from "@/app/actions";
+import { claveAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { formatearPesos, rangoCache } from "@/lib/taxonomia";
 import type { Contacto, Dj } from "@/lib/types";
@@ -15,14 +16,11 @@ export const metadata: Metadata = {
 
 const COOKIE = "bm_admin";
 
-function claveEsperada(): string {
-  return process.env.ADMIN_KEY ?? "beatmatch";
-}
-
 async function entrar(fd: FormData): Promise<void> {
   "use server";
+  const esperada = claveAdmin();
   const clave = String(fd.get("clave") ?? "");
-  if (clave !== claveEsperada()) return;
+  if (esperada === null || clave !== esperada) return;
   const c = await cookies();
   c.set(COOKIE, clave, {
     httpOnly: true,
@@ -42,6 +40,28 @@ async function salir(): Promise<void> {
 
 function Pantalla({ children }: { children: React.ReactNode }) {
   return <div className="py-12">{children}</div>;
+}
+
+// ── Sin clave configurada ──────────────────────────────────────────
+
+function SinClave() {
+  return (
+    <Pantalla>
+      <div className="max-w-lg">
+        <p className="etiqueta text-signal">Panel deshabilitado</p>
+        <h1 className="titulo text-3xl mt-3">Falta configurar ADMIN_KEY</h1>
+        <p className="text-steel text-[15px] mt-5 leading-relaxed">
+          El panel de moderación está cerrado porque no hay clave definida.
+          Agregá la variable <code className="font-mono text-sync">ADMIN_KEY</code>{" "}
+          en el proyecto y volvé a deployar.
+        </p>
+        <p className="font-mono text-[11px] text-steel-2 mt-5 leading-relaxed">
+          Se cierra a propósito en vez de caer a una clave por defecto: un
+          panel con clave adivinable es peor que un panel apagado.
+        </p>
+      </div>
+    </Pantalla>
+  );
 }
 
 // ── Login ──────────────────────────────────────────────────────────
@@ -71,8 +91,7 @@ function Login() {
           </button>
         </form>
         <p className="font-mono text-[10.5px] text-steel-2 mt-4 leading-relaxed">
-          La clave sale de la variable <code>ADMIN_KEY</code>. Cambiala antes de
-          publicar el sitio.
+          La clave sale de la variable <code>ADMIN_KEY</code>.
         </p>
       </div>
     </Pantalla>
@@ -222,8 +241,10 @@ function FilaContacto({
 
 export default async function Admin() {
   const c = await cookies();
+  const esperada = claveAdmin();
+  if (esperada === null) return <SinClave />;
   const clave = c.get(COOKIE)?.value;
-  if (!clave || clave !== claveEsperada()) return <Login />;
+  if (!clave || clave !== esperada) return <Login />;
 
   const store = await db();
   const [todos, contactos] = await Promise.all([

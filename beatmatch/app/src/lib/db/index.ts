@@ -46,12 +46,38 @@ export function adaptadorConfigurado(): NombreAdaptador {
   return url && key ? "supabase" : "file";
 }
 
+/**
+ * El adaptador de archivo NO sirve en producción: en Vercel el filesystem
+ * es de solo lectura y efímero. Sin este corte la app arrancaría, aceptaría
+ * perfiles y los perdería en silencio — que es peor que no arrancar.
+ *
+ * Se evalúa en cada request, no al importar, para que `next build` no
+ * necesite las credenciales.
+ */
+function verificarAdaptador(cual: NombreAdaptador): void {
+  // Override explícito para probar el build de producción en local, donde
+  // el filesystem sí se puede escribir. Un deploy nunca lo va a tener
+  // seteado por accidente.
+  if (process.env.BEATMATCH_ALMACEN === "archivo") return;
+
+  if (cual === "file" && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Beatmatch no tiene base de datos configurada y está en producción. " +
+        "El almacén de archivo perdería todos los datos porque el filesystem " +
+        "es de solo lectura. Definí NEXT_PUBLIC_SUPABASE_URL y " +
+        "SUPABASE_SERVICE_ROLE_KEY en las variables de entorno del proyecto.",
+    );
+  }
+}
+
 let cache: Promise<Store> | null = null;
 
 export function db(): Promise<Store> {
   if (!cache) {
+    const cual = adaptadorConfigurado();
+    verificarAdaptador(cual);
     cache =
-      adaptadorConfigurado() === "supabase"
+      cual === "supabase"
         ? import("./supabase").then((m) => m.crearStoreSupabase())
         : import("./file").then((m) => m.crearStoreArchivo());
   }

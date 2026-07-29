@@ -1,15 +1,21 @@
 // Recorrido de los 15 flujos que importan, contra un servidor levantado.
 //
 //   rm -f data/beatmatch.json
-//   npm run build && npx next start -p 3211 &
+//   npm run build
+//   BEATMATCH_ALMACEN=archivo ADMIN_KEY=beatmatch \
+//     NEXT_PUBLIC_SITE_URL=http://localhost:3211 npx next start -p 3211 &
 //   node tests/flujos.mjs
+//
+// IMPORTANTE: corré esto contra `next start`, no contra `next dev`. El
+// servidor de desarrollo instrumenta las lecturas de disco y mete el
+// contenido de data/beatmatch.json en el payload RSC, así que las tres
+// comprobaciones de filtrado de datos fallan por un artefacto del modo
+// dev. (De paso: nunca expongas un `next dev` a internet.)
 //
 // La prueba escribe en el almacén: borrá data/beatmatch.json antes de
 // correrla o vas a acumular perfiles "Prueba Sonora".
 import { chromium } from 'playwright';
-const B = 'http://localhost:3211';
-// Si el entorno trae su propio Chromium se le pasa la ruta por variable;
-// si no, Playwright usa el que descargó.
+const B = process.env.BASE ?? 'http://localhost:3211';
 const exe = process.env.CHROMIUM_PATH;
 const b = await chromium.launch(exe ? { executablePath: exe } : {});
 const ctx = await b.newContext({ viewport: { width: 1280, height: 900 } });
@@ -85,8 +91,10 @@ await p.goto(`${B}/dj/prueba-sonora`);
 await p.waitForSelector('h1');
 ok('perfil publico carga', (await p.locator('h1').innerText()).toLowerCase().includes('prueba sonora'));
 const html = await p.content();
+const tokenCrudo = new URL(editUrl).searchParams.get('token');
 ok('el perfil publico NO expone el mail del DJ', !html.includes('prueba@test.com'));
-ok('el perfil publico NO expone el edit_token', !html.includes('editar?token='));
+ok(`el perfil publico NO expone el edit_token crudo`, !!tokenCrudo && !html.includes(tokenCrudo));
+ok('el perfil publico NO expone tokens de otros perfiles', !html.includes('demo-token-'));
 
 await p.fill('#productora_nombre', 'Vera Producciones');
 await p.fill('#productora_email', 'vera@productora.com');
@@ -103,7 +111,7 @@ const cont = await p.locator('h3:has-text("Vera Producciones")').count();
 ok('el contacto aparece en admin', cont === 1);
 
 // 10. Editar con token valido
-await p.goto(editUrl.replace('http://localhost:3211', B));
+await p.goto(editUrl.replace(/^https?:\/\/[^/]+/, B));
 await p.waitForSelector('#nombre_artistico', { timeout: 8000 });
 await p.fill('#bio', 'Bio editada con el token.');
 await p.click('button:has-text("Guardar cambios")');
