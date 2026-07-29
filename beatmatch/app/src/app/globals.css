@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+/* Tokens de la identidad de Beatmatch, portados de la landing de la Fase 01.
+   La app se compromete a un único tema oscuro, igual que la marca. */
+@theme {
+  --color-ink: #0a0a0d;
+  --color-ink-2: #101016;
+  --color-panel: #16161c;
+  --color-panel-2: #1c1c24;
+  --color-paper: #efede4;
+  --color-signal: #ff5b26;
+  --color-sync: #c8ff4d;
+  --color-steel: #98939a;
+  --color-steel-2: #6b6772;
+  --color-texto: #f3f1e9;
+  --color-linea: #26262e;
+  --color-linea-fuerte: #35353f;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 700px 420px at 8% -8%, rgba(255, 91, 38, 0.09), transparent 60%),
+    radial-gradient(ellipse 700px 420px at 96% 4%, rgba(200, 255, 77, 0.05), transparent 55%),
+    var(--color-ink);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@layer components {
+  .etiqueta {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-steel-2);
+  }
+
+  .titulo {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    line-height: 1.02;
+  }
+
+  .campo {
+    width: 100%;
+    background: rgba(239, 237, 228, 0.02);
+    border: 1px solid var(--color-linea-fuerte);
+    border-radius: 2px;
+    padding: 12px 13px;
+    color: var(--color-texto);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+  .campo::placeholder {
+    color: var(--color-steel-2);
+  }
+  .campo:focus {
+    border-color: var(--color-sync);
+    background: rgba(200, 255, 77, 0.035);
+    box-shadow: 0 0 0 3px rgba(200, 255, 77, 0.16);
+  }
+  .campo[aria-invalid="true"] {
+    border-color: var(--color-signal);
+  }
+
+  select.campo {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%2398939a' stroke-width='1.5' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 34px;
+  }
+
+  .etiqueta-campo {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-steel);
+    display: block;
+    margin-bottom: 7px;
+  }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 13px 26px;
+    border-radius: 2px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  }
+  .btn-primario {
+    background: var(--color-signal);
+    color: var(--color-ink);
+    box-shadow: 0 12px 28px -14px rgba(255, 91, 38, 0.7);
+  }
+  .btn-secundario {
+    background: var(--color-sync);
+    color: var(--color-ink);
+  }
+  .btn-borde {
+    background: transparent;
+    color: var(--color-texto);
+    border: 1px solid var(--color-linea-fuerte);
+  }
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .btn-borde:hover:not(:disabled) {
+    border-color: var(--color-signal);
+    color: var(--color-signal);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .tarjeta {
+    background: var(--color-panel);
+    border: 1px solid var(--color-linea);
+    border-radius: 3px;
+  }
+
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 2px;
+    background: rgba(200, 255, 77, 0.1);
+    color: var(--color-sync);
+    white-space: nowrap;
+  }
+  .chip-signal {
+    background: rgba(255, 91, 38, 0.12);
+    color: var(--color-signal);
+  }
+  .chip-neutro {
+    background: rgba(152, 147, 154, 0.12);
+    color: var(--color-steel);
+  }
+
+  .error {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--color-signal);
+    margin-top: 6px;
+  }
+}
