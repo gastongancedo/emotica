@@ -1,0 +1,1854 @@
+<title>BEATMATCH · Plan de Negocios — Consola de trabajo</title>
+
+<style>
+/* ============================================================
+   TOKENS — derivados del sistema existente de la landing
+   signal #FF5B26 · sync #C8FF4D · ink #0A0A0D · paper #EFEDE4
+   ============================================================ */
+:root{
+  --bg:#EFEDE4;
+  --bg-panel:#FAF8F2;
+  --bg-sunk:#E5E2D7;
+  --fg:#14141A;
+  --fg-muted:#5E5A55;
+  --fg-faint:#8A857E;
+  --line:rgba(20,20,26,.13);
+  --line-strong:rgba(20,20,26,.26);
+  --signal:#C93D0C;
+  --signal-soft:rgba(201,61,12,.10);
+  --sync:#4E6B00;
+  --sync-soft:rgba(78,107,0,.12);
+
+  --st-ok:#4E6B00;      --st-ok-bg:rgba(78,107,0,.13);
+  --st-warn:#8F5A0A;    --st-warn-bg:rgba(143,90,10,.13);
+  --st-crit:#C93D0C;    --st-crit-bg:rgba(201,61,12,.11);
+  --st-idle:#6E6A66;    --st-idle-bg:rgba(110,106,102,.12);
+
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+  --r:3px;
+  --shadow:0 1px 2px rgba(20,20,26,.05),0 8px 24px -16px rgba(20,20,26,.22);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0A0A0D; --bg-panel:#15151B; --bg-sunk:#101016;
+    --fg:#F3F1E9; --fg-muted:#98939A; --fg-faint:#6B6772;
+    --line:rgba(239,237,228,.11); --line-strong:rgba(239,237,228,.22);
+    --signal:#FF5B26; --signal-soft:rgba(255,91,38,.14);
+    --sync:#C8FF4D; --sync-soft:rgba(200,255,77,.13);
+    --st-ok:#C8FF4D;  --st-ok-bg:rgba(200,255,77,.13);
+    --st-warn:#E8A33D;--st-warn-bg:rgba(232,163,61,.14);
+    --st-crit:#FF5B26;--st-crit-bg:rgba(255,91,38,.14);
+    --st-idle:#7E7A85;--st-idle-bg:rgba(126,122,133,.15);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 40px -24px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#EFEDE4; --bg-panel:#FAF8F2; --bg-sunk:#E5E2D7;
+  --fg:#14141A; --fg-muted:#5E5A55; --fg-faint:#8A857E;
+  --line:rgba(20,20,26,.13); --line-strong:rgba(20,20,26,.26);
+  --signal:#C93D0C; --signal-soft:rgba(201,61,12,.10);
+  --sync:#4E6B00; --sync-soft:rgba(78,107,0,.12);
+  --st-ok:#4E6B00;  --st-ok-bg:rgba(78,107,0,.13);
+  --st-warn:#8F5A0A;--st-warn-bg:rgba(143,90,10,.13);
+  --st-crit:#C93D0C;--st-crit-bg:rgba(201,61,12,.11);
+  --st-idle:#6E6A66;--st-idle-bg:rgba(110,106,102,.12);
+  --shadow:0 1px 2px rgba(20,20,26,.05),0 8px 24px -16px rgba(20,20,26,.22);
+}
+:root[data-theme="dark"]{
+  --bg:#0A0A0D; --bg-panel:#15151B; --bg-sunk:#101016;
+  --fg:#F3F1E9; --fg-muted:#98939A; --fg-faint:#6B6772;
+  --line:rgba(239,237,228,.11); --line-strong:rgba(239,237,228,.22);
+  --signal:#FF5B26; --signal-soft:rgba(255,91,38,.14);
+  --sync:#C8FF4D; --sync-soft:rgba(200,255,77,.13);
+  --st-ok:#C8FF4D;  --st-ok-bg:rgba(200,255,77,.13);
+  --st-warn:#E8A33D;--st-warn-bg:rgba(232,163,61,.14);
+  --st-crit:#FF5B26;--st-crit-bg:rgba(255,91,38,.14);
+  --st-idle:#7E7A85;--st-idle-bg:rgba(126,122,133,.15);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 18px 40px -24px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font-family:var(--sans);font-size:15.5px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+
+/* ---------- utility type ---------- */
+.eyebrow{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--fg-faint);
+}
+.mono{font-family:var(--mono)}
+h1,h2,h3,h4{text-wrap:balance;margin:0;font-weight:800;letter-spacing:-.015em}
+h1{font-size:clamp(30px,5.2vw,50px);line-height:1.02;text-transform:uppercase;letter-spacing:-.02em}
+h2{font-size:clamp(21px,3vw,27px);line-height:1.14;text-transform:uppercase;letter-spacing:-.005em}
+h3{font-size:17.5px;line-height:1.28}
+h4{font-size:14px;line-height:1.35;font-weight:700}
+p{margin:0}
+a{color:inherit}
+strong{font-weight:670}
+
+/* ---------- shell ---------- */
+.shell{max-width:1280px;margin:0 auto;padding:0 22px}
+
+.topbar{
+  position:sticky;top:0;z-index:60;background:var(--bg);
+  border-bottom:1px solid var(--line);
+}
+.topbar__in{
+  max-width:1280px;margin:0 auto;padding:13px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.brand__word{
+  font-family:var(--mono);font-weight:700;font-size:13.5px;
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+}
+.brand__word i{font-style:normal;color:var(--signal)}
+.brand__sub{
+  font-family:var(--mono);font-size:10.5px;color:var(--fg-faint);
+  letter-spacing:.1em;text-transform:uppercase;
+  padding-left:11px;margin-left:2px;border-left:1px solid var(--line-strong);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.crew{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-muted)}
+.crew b{font-weight:600;color:var(--fg)}
+@media (max-width:720px){.brand__sub,.crew{display:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:52px 0 6px}
+.hero__tag{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.hero__tag::before{content:"";width:26px;height:2px;background:var(--signal)}
+.hero h1{max-width:19ch}
+.hero h1 em{font-style:normal;color:var(--signal)}
+.hero__lede{
+  margin-top:20px;max-width:62ch;font-size:17px;color:var(--fg-muted);line-height:1.6;
+}
+.hero__lede b{color:var(--fg);font-weight:640}
+
+/* ---------- stat row ---------- */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  margin-top:38px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+}
+.stat{background:var(--bg-panel);padding:18px 18px 16px;display:flex;flex-direction:column;gap:5px}
+.stat__n{
+  font-family:var(--mono);font-size:clamp(24px,3.4vw,32px);font-weight:600;
+  line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+}
+.stat__n small{font-size:.5em;font-weight:500;color:var(--fg-faint);letter-spacing:0}
+.stat__l{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-faint);line-height:1.4}
+.stat--crit .stat__n{color:var(--st-crit)}
+.stat--ok .stat__n{color:var(--st-ok)}
+@media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- channel strip (mixer meter = estado por sección) ---------- */
+.strip{
+  margin-top:34px;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--bg-panel);padding:20px 20px 14px;box-shadow:var(--shadow);
+}
+.strip__head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.strip__legend{display:flex;gap:15px;flex-wrap:wrap}
+.lg{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-muted)}
+.lg i{width:9px;height:9px;border-radius:1px;display:block}
+.meters{
+  display:flex;gap:3px;align-items:flex-end;height:112px;
+  overflow-x:auto;padding-bottom:4px;
+}
+.ch{flex:1 1 0;min-width:20px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:6px;position:relative}
+.ch__bar{
+  width:100%;border-radius:1px 1px 0 0;background:var(--st-idle-bg);
+  border-top:2px solid var(--st-idle);
+  transform-origin:bottom;animation:rise .5s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes rise{from{transform:scaleY(.04)}to{transform:scaleY(1)}}
+.ch__lab{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.02em;
+  color:var(--fg-faint);text-align:center;white-space:nowrap;
+}
+.ch[data-s="ok"]   .ch__bar{background:var(--st-ok-bg);border-top-color:var(--st-ok)}
+.ch[data-s="warn"] .ch__bar{background:var(--st-warn-bg);border-top-color:var(--st-warn)}
+.ch[data-s="crit"] .ch__bar{background:var(--st-crit-bg);border-top-color:var(--st-crit)}
+.ch:hover .ch__lab{color:var(--fg)}
+.ch__tip{
+  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:var(--fg);color:var(--bg);font-family:var(--mono);font-size:10px;
+  padding:5px 8px;border-radius:2px;white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .14s;z-index:5;letter-spacing:.02em;
+}
+.ch:hover .ch__tip,.ch:focus-within .ch__tip{opacity:1}
+
+/* ---------- alert ---------- */
+.alert{
+  margin-top:34px;border:1px solid var(--st-crit);border-left-width:4px;
+  border-radius:var(--r);background:var(--st-crit-bg);padding:22px 24px;
+  display:flex;flex-direction:column;gap:11px;
+}
+.alert__t{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--st-crit);font-weight:600}
+.alert h3{font-size:19px}
+.alert p{color:var(--fg-muted);max-width:74ch}
+.alert p b{color:var(--fg)}
+
+/* ---------- layout: rail + main ---------- */
+.body{display:grid;grid-template-columns:214px 1fr;gap:44px;margin-top:64px;align-items:start}
+@media (max-width:940px){.body{grid-template-columns:1fr;gap:0}}
+
+.rail{position:sticky;top:70px}
+@media (max-width:940px){
+  .rail{position:static;margin-bottom:36px;border:1px solid var(--line);border-radius:var(--r);padding:16px;background:var(--bg-panel)}
+}
+.rail__t{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-faint);margin-bottom:12px}
+.rail a{
+  display:flex;align-items:baseline;gap:9px;padding:6px 0;text-decoration:none;
+  color:var(--fg-muted);font-size:13.5px;border-bottom:1px solid transparent;transition:color .15s;
+}
+.rail a:hover,.rail a:focus-visible{color:var(--fg)}
+.rail a span{font-family:var(--mono);font-size:10px;color:var(--fg-faint);min-width:26px;letter-spacing:.03em}
+
+/* ---------- sections ---------- */
+.sec{scroll-margin-top:74px;padding-bottom:60px}
+.sec + .sec{border-top:1px solid var(--line);padding-top:52px}
+.sec__head{display:flex;flex-direction:column;gap:9px;margin-bottom:26px}
+.sec__meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sec__desc{color:var(--fg-muted);max-width:70ch;margin-top:3px}
+
+.pill{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  padding:4px 8px;border-radius:2px;font-weight:600;white-space:nowrap;
+  background:var(--st-idle-bg);color:var(--st-idle);
+}
+.pill--ok{background:var(--st-ok-bg);color:var(--st-ok)}
+.pill--warn{background:var(--st-warn-bg);color:var(--st-warn)}
+.pill--crit{background:var(--st-crit-bg);color:var(--st-crit)}
+
+/* prose */
+.prose{display:flex;flex-direction:column;gap:17px}
+.prose p{max-width:70ch;color:var(--fg-muted)}
+.prose p b,.prose li b{color:var(--fg);font-weight:640}
+.prose ul,.prose ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;max-width:70ch;color:var(--fg-muted)}
+.prose h3{margin-top:14px}
+.prose h4{margin-top:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);font-weight:600}
+
+/* cards */
+.card{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;display:flex;flex-direction:column;gap:12px}
+.card--sunk{background:var(--bg-sunk)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:840px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* callout */
+.note{
+  border-left:3px solid var(--signal);background:var(--signal-soft);
+  padding:15px 18px;border-radius:0 var(--r) var(--r) 0;
+  display:flex;flex-direction:column;gap:8px;
+}
+.note--sync{border-left-color:var(--sync);background:var(--sync-soft)}
+.note__t{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);font-weight:600}
+.note--sync .note__t{color:var(--sync)}
+.note p{margin:0;font-size:14.5px;color:var(--fg-muted);max-width:72ch}
+.note p b{color:var(--fg)}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--bg-panel)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+th{
+  text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--fg-faint);font-weight:600;
+  padding:11px 14px;border-bottom:1px solid var(--line-strong);white-space:nowrap;
+  background:var(--bg-panel);
+}
+td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--fg-muted);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td b,td strong{color:var(--fg);font-weight:640}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag-v{font-family:var(--mono);font-size:11px;color:var(--signal);font-weight:600;white-space:nowrap}
+
+/* Q list — instrumentos */
+.qs{display:flex;flex-direction:column;gap:3px;counter-reset:none}
+.q{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.q:last-child{border-bottom:none}
+.q__n{font-family:var(--mono);font-size:10.5px;color:var(--signal);min-width:34px;font-weight:600;letter-spacing:.02em}
+.q__b{flex:1;min-width:0}
+.q__b p{margin:0;color:var(--fg);font-size:14.5px}
+.q__o{margin-top:5px;font-family:var(--mono);font-size:11.5px;color:var(--fg-faint);line-height:1.62}
+.blk{margin-top:22px}
+.blk__h{
+  font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--fg-faint);padding-bottom:8px;border-bottom:1px solid var(--line-strong);margin-bottom:5px;
+  display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+}
+.blk__h b{color:var(--fg);font-weight:600}
+
+/* diagram */
+.dia{background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;overflow-x:auto}
+.dia pre.mermaid{background:none;margin:0;display:flex;justify-content:center;min-width:0}
+
+/* checklist */
+.chk{display:flex;flex-direction:column;gap:0}
+.chk__i{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.chk__i:last-child{border-bottom:none}
+.chk__box{width:14px;height:14px;border:1.5px solid var(--line-strong);border-radius:2px;flex-shrink:0;margin-top:4px}
+.chk__i p{margin:0;font-size:14.5px;color:var(--fg-muted)}
+.chk__i p b{color:var(--fg)}
+
+/* footer */
+footer{border-top:1px solid var(--line);margin-top:30px;padding:30px 0 60px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer p{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-faint)}
+
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px;border-radius:2px}
+</style>
+
+<div class="topbar">
+  <div class="topbar__in">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <circle cx="8" cy="17" r="6.5" stroke="var(--signal)" stroke-width="2.4"/>
+        <circle cx="26" cy="17" r="6.5" stroke="var(--sync)" stroke-width="2.4"/>
+        <line x1="4" y1="17" x2="30" y2="17" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="1 3.4"/>
+        <circle cx="17" cy="17" r="3" fill="var(--fg)"/>
+      </svg>
+      <div class="brand__word">BEAT<i>MATCH</i></div>
+      <div class="brand__sub">Plan de Negocios · FACO</div>
+    </div>
+    <div class="crew"><span>Equipo</span> <b>Gastón · Cani</b></div>
+  </div>
+</div>
+
+<div class="shell">
+
+  <header class="hero">
+    <div class="hero__tag"><span class="eyebrow">Consola de trabajo · actualizada 29·07·2026</span></div>
+    <h1>Todo el plan,<br>y lo que <em>todavía no está</em>.</h1>
+    <p class="hero__lede">
+      Estado real de las 25 subsecciones del trabajo, los dos instrumentos de campo listos para
+      corrección, los borradores escritos y — sobre todo — <b>las 32 fuentes que nadie verificó
+      todavía</b>. Ninguna afirmación con marca <span class="tag-v">[V-##]</span> puede pasar al PDF
+      final sin que uno de los dos abra la fuente original.
+    </p>
+
+    <div class="stats">
+      <div class="stat stat--crit">
+        <div class="stat__n">32</div>
+        <div class="stat__l">Fuentes sin verificar</div>
+      </div>
+      <div class="stat stat--ok">
+        <div class="stat__n">2</div>
+        <div class="stat__l">Instrumentos listos<br>para corrección</div>
+      </div>
+      <div class="stat">
+        <div class="stat__n">6</div>
+        <div class="stat__l">Borradores de sección<br>escritos</div>
+      </div>
+      <div class="stat">
+        <div class="stat__n">~47<small> / 50</small></div>
+        <div class="stat__l">Carillas proyectadas<br>del cuerpo</div>
+      </div>
+    </div>
+
+    <section class="strip" aria-label="Estado de avance por subsección">
+      <div class="strip__head">
+        <div>
+          <div class="eyebrow" style="margin-bottom:5px">Avance por subsección</div>
+          <p style="font-size:13.5px;color:var(--fg-muted);max-width:52ch">
+            Altura = avance estimado. Pasá el mouse por cada canal.
+          </p>
+        </div>
+        <div class="strip__legend">
+          <span class="lg"><i style="background:var(--st-ok)"></i>Instrumento listo</span>
+          <span class="lg"><i style="background:var(--st-warn)"></i>Borrador escrito</span>
+          <span class="lg"><i style="background:var(--st-crit)"></i>Ruta crítica</span>
+          <span class="lg"><i style="background:var(--st-idle)"></i>Sin empezar</span>
+        </div>
+      </div>
+      <div class="meters" id="meters"></div>
+    </section>
+
+    <div class="alert">
+      <div class="alert__t">Bloqueo transversal</div>
+      <h3>Los borradores se escribieron sin poder abrir una sola fuente</h3>
+      <p>
+        La sesión que produjo §4A, §4B, §7 y §8A tenía <b>el acceso web bloqueado por política de red</b>.
+        Se pudo buscar y leer resúmenes de buscador, pero todos los sitios devolvieron error 403 — INDEC,
+        ENACOM, SInCA, Boletín Oficial, InfoLEG, medios y hasta Wikipedia. Los resúmenes de buscador son
+        <b>notoriamente imprecisos con cifras, fechas y atribuciones</b>: confunden el año del dato con el
+        de publicación y a veces le adjudican a un organismo un dato producido por otro.
+      </p>
+      <p>
+        Por eso ningún dato externo quedó citado. Cada afirmación empírica lleva marca
+        <span class="tag-v">[V-##]</span> y su fila en la planilla de verificación, con la URL candidata y
+        el dato exacto a confirmar. <b>Lo que no se pueda verificar se borra</b> — no se suaviza, no se
+        escribe «según diversas fuentes». Se borra.
+      </p>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <nav class="rail" aria-label="Secciones">
+      <div class="rail__t">Índice</div>
+      <a href="#estado"><span>00</span>Estado general</a>
+      <a href="#ruta"><span>—</span>Ruta crítica</a>
+      <a href="#reparto"><span>—</span>Reparto Gastón · Cani</a>
+      <a href="#pestel"><span>4A</span>PESTEL</a>
+      <a href="#porter"><span>4B</span>Porter</a>
+      <a href="#entrevistas"><span>5A</span>Entrevistas</a>
+      <a href="#encuesta"><span>5B</span>Encuesta</a>
+      <a href="#tecnico"><span>7</span>Estudio técnico</a>
+      <a href="#juridica"><span>8A</span>Estructura jurídica</a>
+      <a href="#fuentes"><span>—</span>32 fuentes</a>
+      <a href="#anexo"><span>11</span>Anexo uso de IA</a>
+      <a href="#falta"><span>—</span>Lo que falta</a>
+    </nav>
+
+    <main>
+
+      <!-- ══════════ ESTADO ══════════ -->
+      <section class="sec" id="estado">
+        <div class="sec__head">
+          <span class="eyebrow">Documento de control · no forma parte de la entrega</span>
+          <h2>Estado general</h2>
+          <p class="sec__desc">
+            Las 25 subsecciones con su extensión pautada, quién puede hacerlas y qué las bloquea.
+            <b>La suma da ~47 carillas</b>: entra en el rango de 40–50, pero con poco margen. Cualquier
+            sección que se pase obliga a recortar otra.
+          </p>
+        </div>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>§</th><th>Sección</th><th>Carillas</th><th>Responsable</th><th>Estado</th><th>Bloqueado por</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td><b>Resumen ejecutivo</b><br>Se escribe al final</td><td class="num">máx 2</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>Todo el resto</td></tr>
+              <tr><td class="num">2</td><td><b>Modelo CANVAS</b></td><td class="num">~1</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>§5</td></tr>
+              <tr><td class="num">3</td><td><b>Definición del negocio</b><br>Nombre, misión, visión, valor</td><td class="num">~1</td><td>Mixto</td><td><span class="pill">Listo para empezar</span></td><td>—</td></tr>
+              <tr><td class="num">4A</td><td><b>Entorno externo (PESTEL)</b></td><td class="num">2–3</td><td>IA + verif.</td><td><span class="pill pill--warn">Borrador</span></td><td>18 fuentes sin verificar</td></tr>
+              <tr><td class="num">4B</td><td><b>Microentorno (Porter)</b><br>En diagrama</td><td class="num">2–3</td><td>IA + verif.</td><td><span class="pill pill--warn">Borrador</span></td><td>§5A + diagrama en Figma</td></tr>
+              <tr><td class="num">4C</td><td><b>Análisis del equipo emprendedor</b></td><td class="num">1</td><td><b>Equipo</b></td><td><span class="pill">Sin empezar</span></td><td>Solo lo pueden escribir ustedes</td></tr>
+              <tr><td class="num">4D</td><td><b>Matriz FODA</b></td><td class="num">1</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>4A, 4B, 4C</td></tr>
+              <tr><td class="num">4E</td><td><b>Conclusiones</b> — cruce FODA</td><td class="num">1</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>4D</td></tr>
+              <tr><td class="num">5A</td><td><b>3 entrevistas</b><br>Grabadas y desgrabadas</td><td class="num">2–3</td><td><b>Equipo</b></td><td><span class="pill pill--crit">Ruta crítica</span></td><td>Aprobación docente + agendar</td></tr>
+              <tr><td class="num">5B</td><td><b>Encuestas</b> + informe con gráficos</td><td class="num">4–5</td><td>Mixto</td><td><span class="pill pill--crit">Ruta crítica</span></td><td>§5A + aprobación docente</td></tr>
+              <tr><td class="num">5C</td><td><b>CANVAS Propuesta de Valor</b></td><td class="num">1</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>5A, 5B</td></tr>
+              <tr><td class="num">5D</td><td><b>Segmento + User Persona</b></td><td class="num">~2</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>5B</td></tr>
+              <tr><td class="num">5E</td><td><b>Estimación de la demanda</b></td><td class="num">1</td><td>IA + verif.</td><td><span class="pill">Sin empezar</span></td><td>5D</td></tr>
+              <tr><td class="num">6A</td><td><b>Propuesta de valor y posicionamiento</b></td><td class="num">½</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>5C</td></tr>
+              <tr><td class="num">6B</td><td><b>Objetivos comerciales a 3 años</b></td><td class="num">½</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>5E</td></tr>
+              <tr><td class="num">6C</td><td><b>Oferta + identidad de marca</b></td><td class="num">2–3</td><td>Mixto</td><td><span class="pill pill--warn">Parcial</span></td><td>La marca ya existe</td></tr>
+              <tr><td class="num">6D</td><td><b>Política de distribución</b></td><td class="num">1–2</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>6C</td></tr>
+              <tr><td class="num">6E</td><td><b>Equipo de ventas</b></td><td class="num">1–2</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>4C</td></tr>
+              <tr><td class="num">6F</td><td><b>Comunicación</b><br>Mockup + 12 posts + calendario</td><td class="num">2–4</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>6A</td></tr>
+              <tr><td class="num">6G</td><td><b>Política de precios</b></td><td class="num">1</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>5B</td></tr>
+              <tr><td class="num">7A</td><td><b>Estudio técnico: requerimientos</b></td><td class="num">1–2</td><td>IA</td><td><span class="pill pill--warn">Borrador</span></td><td>Precios + §4C</td></tr>
+              <tr><td class="num">7B</td><td><b>Diagrama de flujo del servicio</b></td><td class="num">1–2</td><td>IA</td><td><span class="pill pill--warn">Borrador</span></td><td>Rehacer en Figma</td></tr>
+              <tr><td class="num">8A</td><td><b>Estructura jurídica</b> + costos</td><td class="num">½</td><td>IA + verif.</td><td><span class="pill pill--warn">Borrador</span></td><td>Estado de la SAS ante IGJ</td></tr>
+              <tr><td class="num">8B</td><td><b>Estructura orgánica</b> + organigrama</td><td class="num">1–2</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>4C</td></tr>
+              <tr><td class="num">9</td><td><b>Plan económico-financiero</b><br>Excel: costos, equilibrio, flujo, VAN/TIR</td><td class="num">2–4</td><td>Mixto</td><td><span class="pill">Sin empezar</span></td><td>Planilla del docente + 6B</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid2" style="margin-top:20px">
+          <div class="note">
+            <div class="note__t">Reglas duras de la consigna</div>
+            <p>
+              <b>40–50 carillas</b> sin contar carátulas, imágenes ni anexos, con extensión pautada por
+              sección — <i>«no se corregirán trabajos que no cumplan con este requisito»</i>. Citas en
+              <b>normas APA</b> obligatorias. Plagio: <b>cero, recursa y apercibimiento en el legajo para
+              todos los integrantes</b>. Nada se aprueba sin correcciones previas durante la cursada:
+              traer algo nuevo el día del final se computa como plagio o desaprobado.
+            </p>
+          </div>
+          <div class="note note--sync">
+            <div class="note__t">Entrega y pitch</div>
+            <p>
+              1 PDF + planilla Excel + soporte del pitch, con el nombre
+              <span class="mono">Grupo N_Beatmatch PLAN DE NEGOCIOS_XX</span>.
+              Pitch de <b>6 minutos</b> con <b>preguntas individuales a cada integrante</b> — siendo dos,
+              cada uno tiene que poder defender el trabajo entero, no solo su parte.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════ RUTA CRÍTICA ══════════ -->
+      <section class="sec" id="ruta">
+        <div class="sec__head">
+          <span class="eyebrow">Lo único que no se puede acelerar después</span>
+          <h2>Ruta crítica</h2>
+          <p class="sec__desc">
+            El trabajo de campo no se comprime. Todo lo demás se puede escribir en una semana intensa;
+            las entrevistas y la encuesta, no. <b>Los dos instrumentos ya están escritos</b> — el paso
+            siguiente no es redactar, es llevarlos a corrección y agendar.
+          </p>
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <span class="pill pill--crit">Paso 1</span>
+            <h3>Agendar las 3 entrevistas</h3>
+            <p style="font-size:14.5px;color:var(--fg-muted)">
+              Una productora o dueño de boliche, un DJ emergente, y un especialista con recorrido.
+              Grabadas y desgrabadas. <b style="color:var(--fg)">Sin esto no hay §5A</b>, y §5A alimenta
+              el CANVAS, el user persona y todo el Plan de Marketing.
+            </p>
+          </div>
+          <div class="card">
+            <span class="pill pill--crit">Paso 2</span>
+            <h3>Cuestionario al docente</h3>
+            <p style="font-size:14.5px;color:var(--fg-muted)">
+              La consigna exige aprobación previa del cuestionario. Y hay que resolver con la cátedra
+              <b style="color:var(--fg)">si van 160–200 encuestas o 10–30</b> — cambia el volumen de
+              trabajo de forma brutal.
+            </p>
+          </div>
+          <div class="card">
+            <span class="pill pill--warn">Paso 3</span>
+            <h3>Verificar las 32 fuentes</h3>
+            <p style="font-size:14.5px;color:var(--fg-muted)">
+              Se puede hacer en paralelo al campo. Los precios de servicios son media hora en total; las
+              tres filas de riesgo <b style="color:var(--fg)">necesitan criterio</b> y conviene que las
+              haga quien vaya a escribir la sección.
+            </p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <div class="note__t">Decisión abierta · la más pesada</div>
+          <p>
+            <b>¿160–200 encuestas o 10–30?</b> Beatmatch es un marketplace de dos lados: quien paga en
+            Fase 03 es la productora (B2B), pero los DJs son usuarios masivos.
+            <b>Propuesta:</b> encuestar <b>DJs</b> — universo grande, alcanzable por Instagram, llega a
+            160–200 — y cubrir el lado productoras con las entrevistas en profundidad. Documentado así es
+            una decisión metodológica fundamentada, no una limitación. <b>Pero hay que confirmarlo antes
+            de salir a campo.</b>
+          </p>
+        </div>
+      </section>
+
+      <!-- ══════════ REPARTO ══════════ -->
+      <section class="sec" id="reparto">
+        <div class="sec__head">
+          <span class="eyebrow">Equipo de 2 · Gastón y Cani</span>
+          <h2>Reparto sugerido</h2>
+          <p class="sec__desc">
+            Con dos integrantes hay dos consecuencias concretas que conviene mirar de frente antes de
+            empezar.
+          </p>
+        </div>
+
+        <div class="grid2">
+          <div class="note">
+            <div class="note__t">Consecuencia 1 · La encuesta</div>
+            <p>
+              160–200 respuestas repartidas entre dos personas son <b>80–100 cada uno</b>. Es mucho, y es
+              la razón principal para llevar la decisión del <i>n</i> a la cátedra antes que cualquier otra
+              cosa. Si la respuesta es que 160–200 es innegociable, el plan de difusión por canal
+              del instrumento §5B deja de ser opcional: es la única forma de llegar.
+            </p>
+          </div>
+          <div class="note">
+            <div class="note__t">Consecuencia 2 · El pitch</div>
+            <p>
+              6 minutos con preguntas individuales a cada integrante y solo dos personas para responder:
+              <b>ninguno de los dos puede desconocer una sección</b>. Repartir la ejecución está bien;
+              repartir el conocimiento, no. Conviene que la última semana sea de puesta en común, no de
+              redacción.
+            </p>
+          </div>
+        </div>
+
+        <div class="tw" style="margin-top:18px">
+          <table>
+            <thead><tr><th>Bloque de trabajo</th><th>Sugerido</th><th>Por qué</th></tr></thead>
+            <tbody>
+              <tr><td><b>Entrevista al DJ emergente y al especialista</b></td><td>Uno conduce, el otro toma nota</td><td>Nunca conducen dos a la vez. Los roles se pueden alternar entre entrevistas</td></tr>
+              <tr><td><b>Entrevista a la productora</b></td><td>Idem, roles invertidos</td><td>Que los dos hayan conducido al menos una — es lo que permite defenderla en el pitch</td></tr>
+              <tr><td><b>Verificación de precios de servicios</b> (V-22 a V-27)</td><td>Cualquiera de los dos</td><td>Media hora, no requiere criterio</td></tr>
+              <tr><td><b>Verificación del dato de conectividad</b> (V-09, V-11, V-12)</td><td>Quien escriba §4A</td><td>Requiere decidir a quién se le atribuye el dato. Es la fila que puede hacer caer una afirmación entera</td></tr>
+              <tr><td><b>Verificación de la SAS ante IGJ</b> (V-30)</td><td>Quien escriba §8A</td><td>Condiciona toda la recomendación de la sección</td></tr>
+              <tr><td><b>§4C análisis del equipo emprendedor</b></td><td><b>Los dos, juntos</b></td><td>Es literalmente sobre ustedes. Nadie más lo puede escribir</td></tr>
+              <tr><td><b>Difusión de la encuesta</b></td><td>Repartir por canal, con meta por persona</td><td>Instagram, grupos de WhatsApp, escuelas de DJ, contacto directo. Seguimiento diario</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ══════════ PESTEL ══════════ -->
+      <section class="sec" id="pestel">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§4A · 2–3 carillas</span>
+            <span class="pill pill--warn">Borrador · 18 fuentes sin verificar</span>
+          </div>
+          <h2>Entorno externo — PESTEL</h2>
+          <p class="sec__desc">
+            Un PESTEL que describe el país sin conectar cada dato con una decisión del plan es
+            descripción, no análisis. Cada factor cierra con <b>la implicancia concreta para el
+            negocio</b>, que es lo que después alimenta el FODA.
+          </p>
+        </div>
+
+        <div class="prose">
+          <h4>P · Político</h4>
+          <p>
+            La vida nocturna está regulada a nivel jurisdiccional, no nacional: habilitaciones, controles
+            y horarios se definen por municipio y provincia. En CABA el régimen de seguridad en locales de
+            baile estaría regulado por el <b>Título XIII de la Ley 5688</b> <span class="tag-v">[V-01]</span>,
+            y la <b>Ley Nacional 26.370</b> regula el personal de control de admisión y permanencia
+            <span class="tag-v">[V-02]</span>. Existe un Registro Público de Lugares Bailables con requisitos
+            de seguro, bomberos, servicio médico y libre deuda <span class="tag-v">[V-03]</span>.
+          </p>
+          <div class="note note--sync">
+            <div class="note__t">Implicancia</div>
+            <p>
+              <b>Positiva e indirecta.</b> Beatmatch no opera locales ni organiza eventos: intermedia. Eso
+              la deja fuera del núcleo pesado de la regulación, que recae sobre el organizador y el titular
+              del local. Y la carga regulatoria del sector <b>juega a favor</b>: cuanto más costoso y
+              riesgoso es producir un evento, más valor tiene reducir el tiempo de conseguir al artista.
+              <b>Riesgo a monitorear:</b> un endurecimiento de controles sobre la nocturnidad reduce la
+              cantidad de eventos y con ella la demanda de bookings.
+            </p>
+          </div>
+
+          <h4>E · Económico</h4>
+          <p>
+            El esparcimiento es de los primeros consumos que se ajustan cuando cae el ingreso, y de los
+            primeros que se recuperan. Para un marketplace que cobra comisión sobre transacciones, el ciclo
+            impacta directo sobre el ingreso. Datos a verificar: IPC de mayo 2026 en <b>2,1% mensual,
+            14,7% acumulado y 33,2% interanual</b> <span class="tag-v">[V-04]</span>; en junio 2026 la
+            división <b>«Recreación y cultura»</b> habría sido la de mayor aumento con 4,2%
+            <span class="tag-v">[V-05]</span>.
+          </p>
+          <div class="note note--sync">
+            <div class="note__t">Implicancia · tres consecuencias de diseño</div>
+            <p>
+              <b>1. Contra la suscripción, a favor de la comisión.</b> Un abono fijo en pesos se licúa y
+              obliga a renegociar cada pocos meses; una comisión porcentual se ajusta sola.<br>
+              <b>2. El caché es un dato perecedero.</b> Todo rango en pesos se publica con mes y año — y
+              eso condiciona el producto: el campo «caché» del perfil necesita fecha de última
+              actualización.<br>
+              <b>3. Costos dolarizados contra ingresos en pesos.</b> Nulo mientras corra en niveles
+              gratuitos, pero el modelo financiero tiene que contemplar la brecha al escalar.
+            </p>
+          </div>
+
+          <h4>S · Sociocultural</h4>
+          <p>
+            Es el factor que mejor sostiene la oportunidad y donde el dato es más difícil de conseguir:
+            <b>no existe estadística oficial sobre el mercado de booking de DJs en Argentina</b>. La
+            <b>ENCC</b> del SInCA es la única fuente oficial sobre consumos culturales, con ediciones 2013,
+            2017 y 2022 <span class="tag-v">[V-07]</span>. Falta extraer de ahí el dato de asistencia a
+            recitales y música en vivo <span class="tag-v">[V-08]</span>.
+          </p>
+          <p>
+            Los hechos que sostienen el negocio —Instagram como carta de presentación, informalidad del
+            acuerdo, peso de la red de contactos por sobre el mérito artístico— <b>no están documentados en
+            estadística oficial</b>. Se sostienen con las entrevistas y la encuesta, no con fuente
+            secundaria. Ese es el aporte de investigación propia del trabajo y conviene decirlo así:
+            <i>«no habiendo estadística oficial sobre el mercado de contratación de DJs en Argentina, el
+            equipo relevó evidencia primaria mediante entrevistas y encuesta»</i>.
+          </p>
+          <div class="note note--sync">
+            <div class="note__t">Implicancia</div>
+            <p>
+              La ausencia de datos públicos es <b>barrera y oportunidad a la vez</b>: dificulta dimensionar
+              la demanda en §5E, pero le abre a Beatmatch un posicionamiento que nadie ocupa — publicar
+              cachés promedio por estilo. <b>Puede convertirse en la fuente de referencia de un mercado sin
+              estadísticas.</b>
+            </p>
+          </div>
+
+          <h4>T · Tecnológico</h4>
+          <p>
+            Cifras a verificar: <b>41,2 millones de usuarios de internet en 2025 = 90,1% de la población</b>
+            <span class="tag-v">[V-09]</span>, <b>64,7 millones de líneas móviles = 141%</b>
+            <span class="tag-v">[V-10]</span>, <b>32,2 millones de identidades activas en redes sociales</b>
+            <span class="tag-v">[V-11]</span>, y una brecha del <b>9,9% sin acceso</b>
+            <span class="tag-v">[V-12]</span>.
+          </p>
+          <div class="note">
+            <div class="note__t">⚠ Atención con estas tres filas</div>
+            <p>
+              <b>V-09, V-11 y V-12 son las de mayor riesgo de todo el trabajo.</b> Esa combinación de cifras
+              es típica del informe <i>Digital 2025 Argentina</i> de DataReportal / We Are Social,
+              <b>no de ENACOM</b>. Si la fuente es una consultora privada es igual de legítima, pero hay que
+              citarla como tal. Atribuirle a un organismo público un dato que no produjo es un error grave
+              en un trabajo académico.
+            </p>
+          </div>
+          <div class="note note--sync">
+            <div class="note__t">Implicancia</div>
+            <p>
+              <b>La infraestructura no es una barrera</b> y la brecha se concentra en zonas rurales, fuera
+              del beachhead AMBA. <b>Mobile primero, y en serio</b> — valida priorizar web responsive y QA
+              mobile. La penetración de redes sostiene el plan de reclutamiento de DJs por Instagram.
+            </p>
+          </div>
+
+          <h4>E · Ecológico</h4>
+          <p>
+            Es el factor de menor peso, y conviene decirlo en vez de inflarlo:
+            <b>un PESTEL que fuerza los seis factores por igual demuestra que no se jerarquizó.</b>
+            Beatmatch es una plataforma digital sin logística, sin producción de bienes y sin residuos; su
+            huella directa se limita al consumo de servidores tercerizados. Hay un ángulo indirecto —la
+            digitalización reemplaza traslados de evaluación presencial— pero es de magnitud menor y
+            <b>no conviene construir posicionamiento de marca sobre él</b>: sería sostenibilidad de
+            utilería, y en un plan de negocios se nota.
+          </p>
+
+          <h4>L · Legal</h4>
+          <p>
+            Durante 2025 se habría establecido un nuevo marco de gestión de derechos de autor que redefine
+            el rol de <b>SADAIC</b> y excluye del pago a eventos privados en espacios privados
+            <span class="tag-v">[V-15]</span>. Los locales bailables tributarían un arancel sobre venta de
+            entradas <span class="tag-v">[V-16]</span>. Aplican además la <b>Ley 25.326</b> de datos
+            personales <span class="tag-v">[V-17]</span> y la <b>Ley 24.240</b> de defensa del consumidor
+            <span class="tag-v">[V-18]</span>.
+          </p>
+          <div class="note note--sync">
+            <div class="note__t">Implicancia · cuatro puntos, uno urgente</div>
+            <p>
+              <b>1. SADAIC no es un costo de Beatmatch.</b> La obligación recae sobre el titular del local o
+              el organizador, no sobre el intermediario. Conviene decirlo explícitamente: es la primera
+              objeción que va a aparecer en la defensa del pitch.<br>
+              <b>2. Datos personales — obligación incumplida hoy.</b> El formulario de la Fase 01 ya en línea
+              capta nombre, apellido, fecha de nacimiento y enlaces <b>sin casilla de consentimiento ni
+              política de privacidad publicada</b>. No es una hipótesis: es una brecha real del producto en
+              vivo, y de bajo costo de resolución.<br>
+              <b>3. Responsabilidad del intermediario.</b> Hay que definir contractualmente qué pasa si un DJ
+              no se presenta o una productora no paga. En Fase 03, con seña retenida, deja de ser cláusula y
+              pasa a ser obligación operativa.<br>
+              <b>4. Informalidad fiscal de la oferta.</b> Cuando Beatmatch intermedie pagos, la formalización
+              deja de ser problema del DJ y pasa a ser condición del sistema. Es fricción de adopción a
+              anticipar — y una buena pregunta para las entrevistas.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:34px;margin-bottom:14px">Puente al FODA</h3>
+        <p style="color:var(--fg-muted);max-width:70ch;margin-bottom:16px">
+          Cada fila tiene que poder rastrearse hasta un factor de arriba. Esto es lo que hace que §4D no
+          salga de la nada.
+        </p>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Factor</th><th>Hallazgo</th><th>Va a FODA como</th></tr></thead>
+            <tbody>
+              <tr><td><b>Tecnológico</b></td><td>Penetración ~90% y uso mayoritariamente móvil</td><td><span class="pill pill--ok">Oportunidad</span> El supuesto de adopción digital no es una apuesta</td></tr>
+              <tr><td><b>Sociocultural</b></td><td>No existe estadística pública del mercado de booking</td><td><span class="pill pill--ok">Oportunidad</span> Beatmatch puede ser la fuente de referencia del sector</td></tr>
+              <tr><td><b>Sociocultural</b></td><td>La contratación depende de redes personales cerradas</td><td><span class="pill pill--ok">Oportunidad</span> Es el problema que da origen al negocio</td></tr>
+              <tr><td><b>Económico</b></td><td>Inflación persistente</td><td><span class="pill pill--crit">Amenaza</span> Mitigada por el modelo de comisión sobre suscripción</td></tr>
+              <tr><td><b>Económico</b></td><td>El esparcimiento es de los primeros consumos que se recortan</td><td><span class="pill pill--crit">Amenaza</span> La demanda es procíclica</td></tr>
+              <tr><td><b>Legal</b></td><td>Obligaciones de protección de datos incumplidas hoy</td><td><span class="pill pill--warn">Debilidad</span> Accionable y de bajo costo</td></tr>
+              <tr><td><b>Legal</b></td><td>Informalidad fiscal de la oferta</td><td><span class="pill pill--crit">Amenaza</span> Fricción para la Fase 03</td></tr>
+              <tr><td><b>Político</b></td><td>Regulación pesada sobre locales, no sobre intermediarios</td><td><span class="pill pill--ok">Oportunidad</span> indirecta — la complejidad del sector aumenta el valor de simplificarlo</td></tr>
+              <tr><td><b>Ambiental</b></td><td>Impacto directo marginal</td><td><span class="pill">No se incorpora</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ══════════ PORTER ══════════ -->
+      <section class="sec" id="porter">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§4B · 2–3 carillas · en diagrama</span>
+            <span class="pill pill--warn">Borrador</span>
+          </div>
+          <h2>Microentorno — las cinco fuerzas</h2>
+          <p class="sec__desc">
+            Análisis mayormente propio: depende menos de fuente secundaria que el PESTEL, pero
+            <b>cada afirmación sobre cómo funciona hoy el mercado tiene que quedar referenciada a (E1),
+            (E2) o (E3)</b> una vez hechas las entrevistas. Hoy no lo está, y es la principal deuda de la
+            sección.
+          </p>
+        </div>
+
+        <div class="note">
+          <div class="note__t">Antes de aplicar el modelo</div>
+          <p>
+            Hay algo que la mayoría de los trabajos saltea: <b>Porter analiza la rentabilidad de un sector,
+            y Beatmatch no compite en el sector de la música sino en el de la intermediación.</b> Definido
+            como «servicios de DJ», los proveedores serían los DJs y los clientes las productoras. Definido
+            correctamente como <b>«intermediación digital de contratación de DJs»</b>, los DJs aportan el
+            inventario y las productoras pagan la comisión. Además es un <b>mercado de dos lados</b>, donde
+            los DJs son simultáneamente proveedores y usuarios — el modelo clásico se queda corto ahí, y
+            señalarlo suma.
+          </p>
+        </div>
+
+        <div class="dia" style="margin-top:20px">
+<pre class="mermaid">
+flowchart TB
+    NE["&lt;b&gt;NUEVOS ENTRANTES&lt;/b&gt;&lt;br/&gt;ALTO&lt;br/&gt;Barreras casi nulas&lt;br/&gt;Única defensa: efecto de red"]
+    PN["&lt;b&gt;PROVEEDORES (DJs)&lt;/b&gt;&lt;br/&gt;BAJO–MEDIO&lt;br/&gt;Oferta atomizada&lt;br/&gt;Sin costo de cambio"]
+    RC["&lt;b&gt;RIVALIDAD ACTUAL&lt;/b&gt;&lt;br/&gt;BAJA (hoy)&lt;br/&gt;Sin competidor digital local&lt;br/&gt;Ventana de tiempo, no ventaja"]
+    PC["&lt;b&gt;CLIENTES (Productoras)&lt;/b&gt;&lt;br/&gt;ALTO&lt;br/&gt;Tienen alternativa gratuita&lt;br/&gt;Sin costo de cambio"]
+    PS["&lt;b&gt;SUSTITUTOS&lt;/b&gt;&lt;br/&gt;MUY ALTO&lt;br/&gt;Instagram y WhatsApp&lt;br/&gt;Gratis y ya instalados"]
+    NE --&gt; RC
+    PN --&gt; RC
+    PC --&gt; RC
+    PS --&gt; RC
+    style RC fill:#FF5B26,stroke:#0A0A0D,stroke-width:3px,color:#0A0A0D
+    style PS fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style PC fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style NE fill:#EFEDE4,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style PN fill:#EFEDE4,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+</pre>
+        </div>
+        <p style="font-size:13px;color:var(--fg-faint);margin-top:10px;font-family:var(--mono)">
+          → Rehacer en Figma con la identidad de marca. Las imágenes no cuentan para el límite de carillas.
+        </p>
+
+        <div class="prose" style="margin-top:30px">
+          <h4>1 · Nuevos entrantes — ALTA</h4>
+          <p>
+            Ninguna barrera clásica protege a Beatmatch: el stack corre en niveles gratuitos, la tecnología
+            es estándar, no hay licencia habilitante y no hay economías de escala en la etapa inicial. La
+            marca existe y está bien construida, pero sin reconocimiento acumulado.
+            <b>La única barrera defendible es el efecto de red</b> — y todavía no existe: la Fase 01 está
+            justamente construyéndolo.
+          </p>
+          <p>
+            De ahí sale la consecuencia estratégica más importante del análisis:
+            <b>la ventaja de Beatmatch es temporal y se mide en velocidad de ejecución.</b> Las metas de
+            150–300 DJs cargados antes de abrir el buscador no son vanidad: son la construcción de la única
+            barrera de entrada que el negocio va a tener. <b>Riesgo:</b> existen plataformas internacionales
+            con el modelo validado que no operan acá <span class="tag-v">[V-20]</span>; si alguna entra,
+            llega con producto probado y capital.
+          </p>
+
+          <h4>2 · Proveedores (DJs) — BAJO a MEDIO</h4>
+          <p>
+            Oferta atomizada, sin costo de cambio, sin exclusividad y sin capacidad de acción colectiva. En
+            Fases 01 y 02 no hay negociación económica, así que no hay tensión de precio.
+            <b>Pero:</b> el DJ headliner sí tiene poder alto — y Beatmatch <b>no debería intentar atraerlo</b>
+            en la etapa inicial: su segmento es el emergente y el medio, que es donde el dolor es real.
+            Además, el poder del proveedor acá no se ejerce sobre el precio sino sobre <b>la calidad del
+            inventario</b>: perfiles a medio completar y DJs que no responden degradan el producto sin que
+            haya negociación de por medio.
+          </p>
+
+          <h4>3 · Clientes (productoras) — ALTA</h4>
+          <p>
+            Tienen una alternativa gratuita que ya les funciona. <b>Beatmatch no compite contra otra
+            plataforma: compite contra un método instalado y gratuito con el que la productora ya resuelve
+            el problema</b>, mal pero lo resuelve. Sumale sin costo de cambio, concentración relativa —pocas
+            productoras grandes concentran muchos eventos— y la amenaza permanente de desintermediación.
+          </p>
+          <div class="note note--sync">
+            <div class="note__t">Consecuencia</div>
+            <p>
+              El poder alto del cliente es <b>la razón por la que no se cobra en Fases 01 y 02</b>. Cobrarle
+              a quien tiene una alternativa gratuita, antes de haberle demostrado valor, garantiza el
+              fracaso. <b>El poder del cliente define el momento de la monetización, no solo su precio.</b>
+            </p>
+          </div>
+
+          <h4>4 · Sustitutos — MUY ALTA</h4>
+          <p>
+            Es la fuerza más intensa del sector y la que hay que tratar con más honestidad.
+            <b>Un trabajo que minimiza a sus sustitutos pierde credibilidad entera.</b>
+          </p>
+        </div>
+
+        <div class="tw" style="margin-top:6px">
+          <table>
+            <thead><tr><th>Sustituto</th><th>Por qué gana hoy</th><th>Cómo se lo enfrenta</th></tr></thead>
+            <tbody>
+              <tr><td><b>Instagram + WhatsApp</b></td><td>Gratis, universal, ya instalado, cero fricción</td><td>No se lo reemplaza: se lo complementa. Beatmatch aporta <b>descubrimiento</b> — encontrar a quien no conocés — que es lo que Instagram no hace bien</td></tr>
+              <tr><td><b>Agencias de booking</b></td><td>Confianza, curaduría, relación establecida</td><td>Atienden solo el segmento top. El emergente y el medio quedan desatendidos: ahí está el mercado</td></tr>
+              <tr><td><b>Boca a boca / red personal</b></td><td>Confianza máxima, costo cero</td><td>Solo funciona dentro de la red conocida. <b>Su límite <i>es</i> la oportunidad</b></td></tr>
+              <tr><td><b>Grupos de WhatsApp de la escena</b></td><td>Inmediatez, comunidad</td><td>Sin filtros, sin historial, sin verificación. El mensaje se pierde entre 200 más</td></tr>
+              <tr><td><b>DJ del propio equipo</b></td><td>Costo cero</td><td>Limita el line-up. Aplica a productoras chicas</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <div class="note__t">El análisis</div>
+          <p>
+            El competidor real de Beatmatch no es otra plataforma: <b>es un hábito</b>. Y los hábitos
+            gratuitos, arraigados y que funcionan razonablemente bien son los rivales más difíciles de
+            desplazar, porque no hay que ganarles en producto sino en <b>costo de cambio</b>. De acá sale el
+            posicionamiento: Beatmatch no reemplaza a Instagram, es <b>la capa de descubrimiento y confianza
+            que Instagram nunca fue</b>. La productora va a seguir cerrando por WhatsApp mucho tiempo; el
+            valor está aguas arriba, en <i>encontrar</i> y <i>evaluar</i>, no en cerrar.
+          </p>
+        </div>
+
+        <div class="prose" style="margin-top:24px">
+          <h4>5 · Rivalidad actual — BAJA (hoy)</h4>
+          <p>
+            No hay plataforma digital de booking de DJs operando en Argentina
+            <span class="tag-v">[V-21]</span>, los referentes internacionales no tienen presencia local y
+            las agencias no compiten por el mismo segmento. <b>Pero la rivalidad baja en un mercado sin
+            barreras de entrada no es una ventaja: es una ventana de tiempo.</b> Y hay una pregunta que el
+            trabajo tiene que enfrentar en vez de esquivar: <i>¿por qué nadie lo hizo todavía?</i>
+          </p>
+          <ol>
+            <li><b>El mercado es demasiado chico</b> para sostener un intermediario digital.</li>
+            <li><b>Se intentó y falló</b> — hubo intentos previos que no prosperaron.</li>
+            <li><b>La ventana recién se abre ahora</b> — la digitalización de pagos y la maduración del mercado hacen viable hoy lo que antes no lo era.</li>
+          </ol>
+          <p>
+            <b>Si el trabajo asume la tercera sin descartar las dos primeras, está haciendo un acto de fe.</b>
+            La entrevista al especialista (pregunta E3-13) es el instrumento que resuelve esto.
+          </p>
+        </div>
+
+        <h3 style="margin-top:32px;margin-bottom:14px">Síntesis · atractivo del sector</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Fuerza</th><th>Intensidad</th><th>Efecto sobre la rentabilidad</th></tr></thead>
+            <tbody>
+              <tr><td>Nuevos entrantes</td><td><span class="pill pill--crit">Alta</span></td><td>Negativo</td></tr>
+              <tr><td>Proveedores (DJs)</td><td><span class="pill pill--ok">Baja–Media</span></td><td>Positivo</td></tr>
+              <tr><td>Clientes (productoras)</td><td><span class="pill pill--crit">Alta</span></td><td>Negativo</td></tr>
+              <tr><td>Sustitutos</td><td><span class="pill pill--crit">Muy alta</span></td><td>Negativo</td></tr>
+              <tr><td>Rivalidad actual</td><td><span class="pill pill--ok">Baja</span></td><td>Positivo</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <div class="note__t">Conclusión · incómoda a propósito</div>
+          <p>
+            El sector tiene <b>atractivo estructural moderado a bajo</b>: tres de cinco fuerzas juegan en
+            contra, y las dos favorables son transitorias. Decir esto en un plan de negocios parece
+            contraproducente. No lo es: <b>un sector con atractivo bajo y una ventana abierta es exactamente
+            la situación en la que un emprendedor sin capital puede competir.</b> Si fuera estructuralmente
+            atractivo, ya habría jugadores establecidos con recursos.
+          </p>
+          <p>
+            Las tres condiciones que se desprenden y atraviesan todo el resto del Plan:
+            <b>velocidad</b> (construir la red antes de que aparezca competencia),
+            <b>diferenciación funcional frente al sustituto</b> (hacer algo que WhatsApp no puede, no lo
+            mismo con mejor diseño) y <b>paciencia en la monetización</b> (cobrar temprano destruye la red
+            antes de que exista).
+          </p>
+        </div>
+      </section>
+
+      <!-- ══════════ ENTREVISTAS ══════════ -->
+      <section class="sec" id="entrevistas">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§5A · 2–3 carillas</span>
+            <span class="pill pill--crit">Ruta crítica · instrumento listo</span>
+          </div>
+          <h2>Estudio exploratorio — guion de entrevistas</h2>
+          <p class="sec__desc">
+            No busca representatividad estadística —eso es la encuesta— sino
+            <b>descubrir las variables que después la encuesta va a medir</b>. Alimenta el CANVAS de
+            propuesta de valor, el User Persona, la política de precios y el FODA.
+          </p>
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <span class="pill pill--crit">E1</span>
+            <h3>Productora o boliche</h3>
+            <p style="font-size:14px;color:var(--fg-muted)">Es quien paga en Fase 03; su criterio define el buscador. <b style="color:var(--fg)">Filtro:</b> que haya contratado ≥5 DJs en 12 meses. Preferentemente productora chica o independiente.</p>
+          </div>
+          <div class="card">
+            <span class="pill pill--crit">E2</span>
+            <h3>DJ emergente o medio</h3>
+            <p style="font-size:14px;color:var(--fg-muted)">Es el lado oferta y el usuario de la Fase 01. <b style="color:var(--fg)">Filtro:</b> que toque con regularidad pero sin agencia. Es quien tiene el dolor de visibilidad.</p>
+          </div>
+          <div class="card">
+            <span class="pill pill--crit">E3</span>
+            <h3>Especialista</h3>
+            <p style="font-size:14px;color:var(--fg-muted)">Mirada de sistema: cómo se mueve el mercado y qué intentos previos hubo. <b style="color:var(--fg)">Filtro:</b> ≥8 años en la escena, o del lado de la intermediación.</p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <div class="note__t">Regla que decide la calidad de la entrevista</div>
+          <p>
+            <b>Nunca presentar Beatmatch al principio.</b> Si abrís contando la idea, el entrevistado
+            responde por cortesía y perdés el dato. La idea se presenta recién en el Bloque E, en una frase,
+            sin entusiasmo y sin venderla. Y los silencios se bancan: el dato bueno suele venir después de la
+            pausa incómoda.
+          </p>
+        </div>
+
+        <div class="note note--sync" style="margin-top:14px">
+          <div class="note__t">Advertencia metodológica que conviene dejar escrita</div>
+          <p>
+            Las tres entrevistas se consiguen por la red de contactos del equipo, lo que introduce un
+            <b>sesgo de conveniencia</b>. Reconocerlo explícitamente en el informe <b>suma rigor en vez de
+            restarlo</b>; ocultarlo es lo que el docente va a marcar.
+          </p>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>E1 · Productora de eventos / boliche</b><span>~48 min</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">A · 1</div><div class="q__b"><p>Contame qué hacés y qué tipo de eventos producís.</p></div></div>
+            <div class="q"><div class="q__n">A · 2</div><div class="q__b"><p>¿Cuántos eventos hacés por mes? ¿Con qué estacionalidad?</p></div></div>
+            <div class="q"><div class="q__n">A · 3</div><div class="q__b"><p>¿Cuánta gente trabaja con vos y quién decide la música?</p></div></div>
+            <div class="q"><div class="q__n">B · 4</div><div class="q__b"><p>Pensá en <b>el último DJ que contrataste</b>. Contame paso a paso cómo llegaste a él.</p><div class="q__o">↑ El bloque más importante: reconstruir un caso concreto y reciente, no pedir generalidades</div></div></div>
+            <div class="q"><div class="q__n">B · 5</div><div class="q__b"><p>¿Por dónde lo contactaste? ¿Cuánto tardaste desde que lo pensaste hasta que quedó cerrado?</p></div></div>
+            <div class="q"><div class="q__n">B · 6</div><div class="q__b"><p>¿Consideraste a otros? ¿Cómo los comparaste entre sí?</p></div></div>
+            <div class="q"><div class="q__n">B · 7</div><div class="q__b"><p>¿Cómo acordaron el precio? ¿Quién lo propuso primero?</p></div></div>
+            <div class="q"><div class="q__n">B · 8</div><div class="q__b"><p>¿Hubo contrato, seña, algo escrito? ¿Cómo se pagó?</p></div></div>
+            <div class="q"><div class="q__n">B · 9</div><div class="q__b"><p>¿Qué información te hubiera gustado tener antes de decidir y no tenías?</p></div></div>
+            <div class="q"><div class="q__n">C · 10</div><div class="q__b"><p>¿Alguna vez contrataste a alguien que no funcionó? ¿Qué pasó?</p></div></div>
+            <div class="q"><div class="q__n">C · 11</div><div class="q__b"><p>¿Te falló alguno? ¿Qué hiciste?</p></div></div>
+            <div class="q"><div class="q__n">C · 12</div><div class="q__b"><p>De todo el proceso de armar un evento, ¿dónde está conseguir al DJ en el ranking de dolor de cabeza?</p></div></div>
+            <div class="q"><div class="q__n">C · 13</div><div class="q__b"><p>¿Cuánto tiempo tuyo, en horas, se te va en esto por evento?</p></div></div>
+            <div class="q"><div class="q__n">D · 14</div><div class="q__b"><p>Cuando evaluás un DJ, ¿qué mirás?</p><div class="q__o">Dejar responder libre. Recién después repreguntar por: estilo · sets · seguidores · referencias · haberlo visto tocar · precio</div></div></div>
+            <div class="q"><div class="q__n">D · 15</div><div class="q__b"><p>¿Cuánto pagás habitualmente? ¿De qué depende que sea más o menos?</p></div></div>
+            <div class="q"><div class="q__n">D · 16</div><div class="q__b"><p>¿Los seguidores de Instagram influyen en lo que estás dispuesta a pagar?</p></div></div>
+            <div class="q"><div class="q__n">D · 17</div><div class="q__b"><p>¿Cómo sabés si alguien vale lo que pide?</p></div></div>
+            <div class="q"><div class="q__n">E · 18</div><div class="q__b"><p>Te cuento en qué estamos trabajando: una plataforma donde buscás DJs por estilo, ciudad y presupuesto, escuchás sus sets y los contactás. ¿Qué te parece de entrada?</p><div class="q__o">↑ Recién acá se presenta Beatmatch</div></div></div>
+            <div class="q"><div class="q__n">E · 19</div><div class="q__b"><p>¿Qué te haría <b>no</b> usarla?</p></div></div>
+            <div class="q"><div class="q__n">E · 20</div><div class="q__b"><p>¿Qué tendría que tener sí o sí para que la uses en vez de preguntar en tus grupos?</p></div></div>
+            <div class="q"><div class="q__n">E · 21</div><div class="q__b"><p>Si te resolviera el problema, ¿pagarías? ¿Comisión sobre el caché, abono mensual, o no pagarías?</p></div></div>
+            <div class="q"><div class="q__n">E · 22</div><div class="q__b"><p>¿Conocés algo parecido? ¿Probaste algo así alguna vez?</p></div></div>
+            <div class="q"><div class="q__n">✕ 23</div><div class="q__b"><p>¿Hay algo que no te pregunté y que debería haber preguntado?</p></div></div>
+            <div class="q"><div class="q__n">✕ 24</div><div class="q__b"><p>¿Me podés presentar a alguien más que le sirva contarnos esto?</p></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>E2 · DJ emergente / nivel medio</b><span>~50 min</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">A · 1</div><div class="q__b"><p>¿Hace cuánto que sos DJ y qué tocás?</p></div></div>
+            <div class="q"><div class="q__n">A · 2</div><div class="q__b"><p>¿Vivís de esto o lo combinás con otra cosa?</p></div></div>
+            <div class="q"><div class="q__n">A · 3</div><div class="q__b"><p>¿Cuántas fechas hiciste en los últimos 3 meses?</p></div></div>
+            <div class="q"><div class="q__n">B · 4</div><div class="q__b"><p>Contame cómo conseguiste <b>tu última fecha</b>, paso a paso.</p></div></div>
+            <div class="q"><div class="q__n">B · 5</div><div class="q__b"><p>¿Vos la buscaste o te buscaron?</p></div></div>
+            <div class="q"><div class="q__n">B · 6</div><div class="q__b"><p>¿Cuántas fechas te llegan por gente que ya te conoce versus gente nueva?</p></div></div>
+            <div class="q"><div class="q__n">B · 7</div><div class="q__b"><p>¿Alguna vez te ofreciste a un lugar que no te conocía? ¿Cómo te fue?</p></div></div>
+            <div class="q"><div class="q__n">B · 8</div><div class="q__b"><p>¿Qué le mandás a alguien que te pide material? ¿Tenés algo armado o lo armás cada vez?</p></div></div>
+            <div class="q"><div class="q__n">C · 9</div><div class="q__b"><p>¿Cuál es la parte más frustrante de conseguir fechas?</p></div></div>
+            <div class="q"><div class="q__n">C · 10</div><div class="q__b"><p>¿Te pasó de que te contraten y no te paguen, o que te paguen tarde? Contame.</p></div></div>
+            <div class="q"><div class="q__n">C · 11</div><div class="q__b"><p>¿Te pasó de que te cancelen una fecha ya cerrada?</p></div></div>
+            <div class="q"><div class="q__n">C · 12</div><div class="q__b"><p>¿Cómo llevás la agenda? ¿Se te pisaron fechas alguna vez?</p></div></div>
+            <div class="q"><div class="q__n">C · 13</div><div class="q__b"><p>Si mañana quisieras tocar en un lugar donde no conocés a nadie, ¿qué harías?</p></div></div>
+            <div class="q"><div class="q__n">D · 14</div><div class="q__b"><p>¿Cómo definiste cuánto cobrás?</p></div></div>
+            <div class="q"><div class="q__n">D · 15</div><div class="q__b"><p>¿Sabés lo que cobran otros DJs de tu nivel? ¿Cómo te enterás?</p></div></div>
+            <div class="q"><div class="q__n">D · 16</div><div class="q__b"><p>¿Te sentiste alguna vez en desventaja negociando? ¿Por qué?</p></div></div>
+            <div class="q"><div class="q__n">D · 17</div><div class="q__b"><p>¿Aceptaste fechas mal pagas por visibilidad? ¿Sirvió?</p></div></div>
+            <div class="q"><div class="q__n">E · 18</div><div class="q__b"><p>Te cuento: estamos armando una plataforma donde las productoras buscan DJs por estilo, ciudad y presupuesto, y tenés un perfil con tus sets y tu caché. ¿Qué te parece?</p></div></div>
+            <div class="q"><div class="q__n">E · 19</div><div class="q__b"><p>¿Cargarías tu perfil? ¿Qué te daría pereza cargar?</p></div></div>
+            <div class="q"><div class="q__n">E · 20</div><div class="q__b"><p>¿Mostrarías tu caché ahí? ¿Público o solo para productoras registradas?</p></div></div>
+            <div class="q"><div class="q__n">E · 21</div><div class="q__b"><p>¿Pagarías por aparecer destacado o por estadísticas de tu perfil?</p></div></div>
+            <div class="q"><div class="q__n">E · 22</div><div class="q__b"><p>¿Qué te haría desconfiar de una plataforma así?</p></div></div>
+            <div class="q"><div class="q__n">✕ 23</div><div class="q__b"><p>¿Algo que no te pregunté? ¿Conocés a alguien más que le sirva contarnos esto?</p></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>E3 · Especialista de la industria</b><span>~47 min</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">A · 1</div><div class="q__b"><p>Contame tu recorrido en la escena.</p></div></div>
+            <div class="q"><div class="q__n">A · 2</div><div class="q__b"><p>¿Cómo describirías el estado del mercado de eventos y música electrónica en Argentina hoy?</p></div></div>
+            <div class="q"><div class="q__n">B · 3</div><div class="q__b"><p>¿Cómo se contrata un DJ en Argentina? ¿Cambió en los últimos años?</p></div></div>
+            <div class="q"><div class="q__n">B · 4</div><div class="q__b"><p>¿Qué rol juegan las agencias de booking? ¿A quiénes representan y a quiénes no?</p></div></div>
+            <div class="q"><div class="q__n">B · 5</div><div class="q__b"><p>¿Cuál es el rango de cachés que se maneja hoy, de emergente a headliner?</p><div class="q__o">↑ Esta respuesta calibra los tramos de la P19 de la encuesta</div></div></div>
+            <div class="q"><div class="q__n">B · 6</div><div class="q__b"><p>¿Quién tiene más poder en la negociación, el DJ o el que contrata? ¿De qué depende?</p></div></div>
+            <div class="q"><div class="q__n">B · 7</div><div class="q__b"><p>¿Hay estacionalidad? ¿Cuándo hay más y menos trabajo?</p></div></div>
+            <div class="q"><div class="q__n">B · 8</div><div class="q__b"><p>¿Qué pasó con la escena después de la pandemia?</p></div></div>
+            <div class="q"><div class="q__n">C · 9</div><div class="q__b"><p>¿Cuáles son los problemas crónicos de este mercado?</p></div></div>
+            <div class="q"><div class="q__n">C · 10</div><div class="q__b"><p>¿Qué pasa con los DJs buenos que no tienen contactos?</p></div></div>
+            <div class="q"><div class="q__n">C · 11</div><div class="q__b"><p>¿Hay problemas de pago o de cumplimiento? ¿Cómo se resuelven hoy?</p></div></div>
+            <div class="q"><div class="q__n">C · 12</div><div class="q__b"><p>¿Qué peso tienen las redes sociales en quién consigue fechas?</p></div></div>
+            <div class="q"><div class="q__n">D · 13</div><div class="q__b"><p>¿Hubo intentos previos de digitalizar esto en Argentina? ¿Qué pasó con ellos?</p><div class="q__o">↑ La pregunta que resuelve el «¿por qué nadie lo hizo todavía?» de §4B. Es la más importante de esta entrevista</div></div></div>
+            <div class="q"><div class="q__n">D · 14</div><div class="q__b"><p>Te cuento lo que estamos armando. ¿Qué te parece viable y qué no?</p></div></div>
+            <div class="q"><div class="q__n">D · 15</div><div class="q__b"><p>¿Cuál creés que sería el mayor obstáculo?</p></div></div>
+            <div class="q"><div class="q__n">D · 16</div><div class="q__b"><p>¿Qué me estoy perdiendo?</p></div></div>
+            <div class="q"><div class="q__n">✕ 17</div><div class="q__b"><p>¿A quién más debería entrevistar?</p></div></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:34px;margin-bottom:8px">Grilla de análisis</h3>
+        <p style="color:var(--fg-muted);max-width:70ch;margin-bottom:16px">
+          Una vez desgrabadas las tres, volcarlas acá. <b>Este cruce es lo que se escribe en el informe</b>,
+          no un resumen entrevista por entrevista.
+        </p>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Dimensión</th><th>E1 Productora</th><th>E2 DJ</th><th>E3 Especialista</th><th>¿Coinciden?</th></tr></thead>
+            <tbody>
+              <tr><td><b>Canal por el que se contrata hoy</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Tiempo del proceso</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Criterio principal de selección</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Rango de caché mencionado</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Dolor más fuerte</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Reacción a la idea</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Objeción principal</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Disposición a pagar</b></td><td></td><td></td><td></td><td></td></tr>
+              <tr><td><b>Cita textual más potente</b></td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note note--sync" style="margin-top:18px">
+          <div class="note__t">Regla de escritura</div>
+          <p>
+            Cada afirmación sobre el mercado que salga de las entrevistas se respalda con
+            <b>cita textual entrecomillada</b> e identificación del entrevistado (E1, E2, E3). Lo que aparece
+            en las tres sostiene conclusiones; <b>lo que aparece en una sola se reporta como hipótesis a
+            validar en la encuesta.</b>
+          </p>
+        </div>
+
+        <h3 style="margin-top:30px;margin-bottom:12px">Checklist antes de salir a campo</h3>
+        <div class="card"><div class="chk">
+          <div class="chk__i"><div class="chk__box"></div><p>Guion corregido y <b>aprobado por el equipo docente</b></p></div>
+          <div class="chk__i"><div class="chk__box"></div><p>Tres entrevistados confirmados con día y hora</p></div>
+          <div class="chk__i"><div class="chk__box"></div><p>Grabador probado, <b>y un segundo dispositivo como respaldo</b></p></div>
+          <div class="chk__i"><div class="chk__box"></div><p>Consentimiento de grabación acordado — <b>pedirlo con la grabación ya corriendo</b>, o la desgrabación no se puede anexar</p></div>
+          <div class="chk__i"><div class="chk__box"></div><p>Repartidos los roles: quién conduce y quién toma nota en cada una</p></div>
+          <div class="chk__i"><div class="chk__box"></div><p>Definido dónde se guardan los audios</p></div>
+          <div class="chk__i"><div class="chk__box"></div><p>Desgrabar dentro de las <b>48 hs</b>, mientras el contexto está fresco</p></div>
+        </div></div>
+      </section>
+
+      <!-- ══════════ ENCUESTA ══════════ -->
+      <section class="sec" id="encuesta">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§5B · 4–5 carillas</span>
+            <span class="pill pill--crit">Ruta crítica · instrumento listo</span>
+          </div>
+          <h2>Estudio descriptivo — cuestionario</h2>
+          <p class="sec__desc">
+            30 preguntas, ~5 minutos de completado. <b>Los tramos de caché de la P19 y las opciones de
+            P25/P26 se recalibran con lo que salga de las entrevistas</b> antes de publicar.
+          </p>
+        </div>
+
+        <div class="note">
+          <div class="note__t">⚠ Sobre el tipo de muestreo</div>
+          <p>
+            Un muestreo por conveniencia y bola de nieve <b>no permite inferir al universo con margen de
+            error</b>. Declararlo así en el informe. Escribir «margen de error ±5%» sobre una muestra no
+            probabilística es un error metodológico que el docente va a marcar.
+          </p>
+        </div>
+
+        <h3 style="margin-top:26px;margin-bottom:12px">Objetivos e hipótesis</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Objetivo</th><th>Hipótesis a contrastar</th><th>Preguntas</th></tr></thead>
+            <tbody>
+              <tr><td class="num">O1</td><td>Caracterizar al DJ argentino</td><td>—</td><td class="num">P1–P9</td></tr>
+              <tr><td class="num">O2</td><td>Describir cómo consigue fechas hoy</td><td><b>H1:</b> la mayoría depende de contactos personales y redes, no de canales formales</td><td class="num">P10–P14</td></tr>
+              <tr><td class="num">O3</td><td>Dimensionar el dolor de visibilidad</td><td><b>H2:</b> los DJs con menos de 3 años reportan mayor dificultad para acceder a fechas</td><td class="num">P15–P18</td></tr>
+              <tr><td class="num">O4</td><td>Relevar cachés y asimetría de información</td><td><b>H3:</b> una mayoría no conoce los cachés de referencia de su nivel</td><td class="num">P19–P23</td></tr>
+              <tr><td class="num">O5</td><td>Medir interés y disposición a pagar</td><td><b>H4:</b> el interés en registrarse es alto, pero la disposición a pagar es baja</td><td class="num">P24–P29</td></tr>
+              <tr><td class="num">O6</td><td>Estimar demanda potencial (§5E)</td><td>—</td><td class="num">P8, P10, P19, P24</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>Bloque 0 · Filtro</b><span>2 preguntas</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">P1</div><div class="q__b"><p>¿Sos DJ o hacés sets de forma habitual u ocasional?</p><div class="q__o">Sí → continúa · No → fin del cuestionario</div></div></div>
+            <div class="q"><div class="q__n">P2</div><div class="q__b"><p>¿Tocaste al menos una vez en los últimos 12 meses, en público?</p><div class="q__o">Sí · No, pero toqué antes · Nunca toqué en público<br>→ No excluir a los dos últimos: son el universo «emergente» y su respuesta a P15–P18 es especialmente valiosa. Sí segmentarlos en el análisis</div></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>Bloque 1 · Perfil</b><span>O1 · 7 preguntas</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">P3</div><div class="q__b"><p>Edad</p><div class="q__o">18–24 · 25–29 · 30–34 · 35–39 · 40–49 · 50+</div></div></div>
+            <div class="q"><div class="q__n">P4</div><div class="q__b"><p>Género</p><div class="q__o">Femenino · Masculino · No binario · Prefiero no responder · Otro<br>→ La brecha de género en line-ups está instalada en la escena. Si el dato aparece, es material fuerte para §5D y §6F</div></div></div>
+            <div class="q"><div class="q__n">P5</div><div class="q__b"><p>¿En qué provincia/localidad residís?</p><div class="q__o">Desplegable</div></div></div>
+            <div class="q"><div class="q__n">P6</div><div class="q__b"><p>¿Hace cuánto que sos DJ?</p><div class="q__o">&lt;1 año · 1–3 · 4–7 · 8–15 · &gt;15</div></div></div>
+            <div class="q"><div class="q__n">P7</div><div class="q__b"><p>¿Qué estilos tocás? <i>(múltiple, máx. 3)</i></p><div class="q__o">Techno · House · Tech House · Progressive · Trance · Drum &amp; Bass · Dubstep · Minimal · Cachengue · Reggaetón · Cumbia · Hip-Hop · Disco/Funk · EDM comercial · Otro</div></div></div>
+            <div class="q"><div class="q__n">P8</div><div class="q__b"><p>¿Cuántas fechas tocaste en los últimos 12 meses?</p><div class="q__o">Ninguna · 1–3 · 4–10 · 11–24 · 25–50 · +50</div></div></div>
+            <div class="q"><div class="q__n">P9</div><div class="q__b"><p>¿Cuál es tu relación con la actividad?</p><div class="q__o">Actividad principal, vivo de esto · Secundaria, me genera ingresos · Hobby, poco o ningún ingreso · Estoy empezando, no toqué pago</div></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>Bloque 2 · Cómo conseguís fechas</b><span>O2 · 5 preguntas</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">P10</div><div class="q__b"><p>¿Por qué vía conseguiste <b>tu última fecha</b>?</p><div class="q__o">Me contactó alguien que ya me conocía · Recomendación de otro DJ · Yo escribí ofreciéndome · Agencia o representante · Grupo de WhatsApp/Telegram · Ciclo o residencia fija · Otro</div></div></div>
+            <div class="q"><div class="q__n">P11</div><div class="q__b"><p>¿Qué proporción de tus fechas llega por gente que ya te conocía?</p><div class="q__o">Casi todas · La mayoría · La mitad · Pocas · Casi ninguna</div></div></div>
+            <div class="q"><div class="q__n">P12</div><div class="q__b"><p>¿Qué canales usás habitualmente? <i>(múltiple)</i></p><div class="q__o">Instagram · WhatsApp · Cara a cara en eventos · Agencia · SoundCloud/Mixcloud · Mail · Ninguno, me contactan · Otro</div></div></div>
+            <div class="q"><div class="q__n">P13</div><div class="q__b"><p>Cuando te piden material, ¿qué mandás? <i>(múltiple)</i></p><div class="q__o">Link a un set · Mi Instagram · Un presskit armado · Videos de fechas · Audios por WhatsApp · No tengo nada armado</div></div></div>
+            <div class="q"><div class="q__n">P14</div><div class="q__b"><p>¿Cuánto pasa entre el primer contacto y la fecha confirmada?</p><div class="q__o">&lt;1 semana · 1–2 · 3–4 · +1 mes · Muy variable</div></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>Bloque 3 · Dificultades</b><span>O3 · 4 preguntas</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">P15</div><div class="q__b"><p>Del 1 al 5, ¿qué tan difícil te resulta conseguir fechas nuevas?</p><div class="q__o">Likert 1–5 · 1 = muy fácil, 5 = muy difícil</div></div></div>
+            <div class="q"><div class="q__n">P16</div><div class="q__b"><p>¿Cuánto estás de acuerdo con cada frase? <i>(matriz Likert 1–5)</i></p><div class="q__o">a. Conseguir fechas depende más de a quién conocés que de cómo tocás<br>b. Me cuesta llegar a productoras donde no conozco a nadie<br>c. Mi visibilidad depende de cómo me vaya en Instagram<br>d. Sé qué se cobra en el mercado por fechas como las que hago<br>e. Me resulta fácil organizar las propuestas que me llegan<br>f. Me pasó de perder oportunidades por no enterarme a tiempo</div></div></div>
+            <div class="q"><div class="q__n">P17</div><div class="q__b"><p>¿Alguna vez te pasó alguna de estas situaciones? <i>(múltiple)</i></p><div class="q__o">Me pagaron tarde · No me pagaron · Me cancelaron una fecha confirmada · Se me superpusieron dos fechas · Cobré menos por falta de referencias · Toqué gratis «por visibilidad» y no sirvió · Ninguna</div></div></div>
+            <div class="q"><div class="q__n">P18</div><div class="q__b"><p>¿Cuál es tu mayor dificultad hoy como DJ? <i>(abierta, opcional)</i></p><div class="q__o">↑ Pregunta clave: de acá salen las citas textuales del informe y el vocabulario para el User Persona y la comunicación</div></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>Bloque 4 · Caché</b><span>O4 · 5 preguntas</span></div>
+          <div class="qs">
+            <div class="q"><div class="q__n">P19</div><div class="q__b"><p>¿Cuánto cobrás habitualmente por una fecha?</p><div class="q__o">No cobro · &lt;$50.000 · $50–100.000 · $100–200.000 · $200–400.000 · $400–700.000 · +$700.000 · Prefiero no responder<br><b>⚠ Recalibrar estos tramos con las entrevistas antes de publicar, y registrar mes y año del relevamiento.</b> En contexto inflacionario, un rango en pesos sin fecha no significa nada</div></div></div>
+            <div class="q"><div class="q__n">P20</div><div class="q__b"><p>¿Cómo definiste ese precio?</p><div class="q__o">Lo que me ofrecieron y acepté · Comparando con colegas · Lo calculé yo · Me lo fijó mi agencia · No tengo precio definido, negocio cada vez</div></div></div>
+            <div class="q"><div class="q__n">P21</div><div class="q__b"><p>¿Sabés cuánto cobran otros DJs de tu mismo nivel?</p><div class="q__o">Sí, bastante bien · Más o menos · No, casi nada</div></div></div>
+            <div class="q"><div class="q__n">P22</div><div class="q__b"><p>¿Quién suele proponer el precio primero?</p><div class="q__o">Yo · Quien contrata · Depende</div></div></div>
+            <div class="q"><div class="q__n">P23</div><div class="q__b"><p>¿Cómo cerrás normalmente el acuerdo? <i>(múltiple)</i></p><div class="q__o">De palabra · Por chat de WhatsApp · Contrato escrito · Con seña previa · Otro</div></div></div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk__h"><b>Bloque 5 · Interés en la plataforma</b><span>O5 · 6 preguntas</span></div>
+          <p style="font-size:13.5px;color:var(--fg-faint);font-family:var(--mono);padding:10px 0 4px;line-height:1.6">
+            Texto a mostrar antes del bloque: «Estamos desarrollando BEATMATCH, una plataforma donde las
+            productoras buscan DJs por estilo, ciudad y presupuesto, escuchan sus sets y los contactan
+            directo. Los DJs tienen un perfil propio con sus sets, su estilo y su caché.»
+          </p>
+          <div class="qs">
+            <div class="q"><div class="q__n">P24</div><div class="q__b"><p>¿Qué tan interesado/a estarías en crear tu perfil?</p><div class="q__o">1 = nada · 5 = muchísimo</div></div></div>
+            <div class="q"><div class="q__n">P25</div><div class="q__b"><p>¿Qué es lo que más te interesaría? <i>(hasta 2)</i></p><div class="q__o">Que me encuentren productoras que no me conocen · Tener un perfil/presskit para compartir · Saber cuánto se cobra en el mercado · Recibir propuestas ordenadas en un lugar · Tener respaldo si no me pagan · Nada me interesa demasiado</div></div></div>
+            <div class="q"><div class="q__n">P26</div><div class="q__b"><p>¿Qué te haría <b>no</b> usarla? <i>(hasta 2)</i></p><div class="q__o">Me da trabajo cargar y mantener el perfil · No confío en que lleguen propuestas reales · Prefiero mis contactos · No quiero mostrar mi caché · Me preocupa qué hacen con mis datos · Nada, la usaría igual</div></div></div>
+            <div class="q"><div class="q__n">P27</div><div class="q__b"><p>¿Mostrarías tu caché en el perfil?</p><div class="q__o">Sí, público · Solo para productoras registradas · Solo un rango aproximado · No lo mostraría</div></div></div>
+            <div class="q"><div class="q__n">P28</div><div class="q__b"><p>Si te consiguiera fechas reales, ¿pagarías por alguna de estas? <i>(múltiple)</i></p><div class="q__o">Abono mensual para aparecer destacado · Comisión sobre el caché, solo al cerrar · Estadísticas de mi perfil · No pagaría nada</div></div></div>
+            <div class="q"><div class="q__n">P29</div><div class="q__b"><p>Si eligió abono: ¿cuánto pagarías por mes?</p><div class="q__o">&lt;$3.000 · $3.000–6.000 · $6.000–12.000 · +$12.000</div></div></div>
+            <div class="q"><div class="q__n">P30</div><div class="q__b"><p>¿Querés que te avisemos cuando esté lista? Dejanos tu mail o Instagram <i>(opcional)</i></p><div class="q__o">↑ Doble función: cierra el loop de investigación y <b>alimenta la base real de la Fase 01</b>. Declarar que el dato es opcional y separado de las respuestas anónimas</div></div></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:34px;margin-bottom:8px">Plan de análisis</h3>
+        <p style="color:var(--fg-muted);max-width:70ch;margin-bottom:16px">
+          Definirlo <b>antes</b> de encuestar. Si el análisis se improvisa después, siempre falta una
+          pregunta. Estos son los cruces que sostienen las hipótesis:
+        </p>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Cruce</th><th>Contrasta</th><th>Qué esperamos ver</th></tr></thead>
+            <tbody>
+              <tr><td class="num"><b>P6 × P15</b><br>antigüedad × dificultad</td><td><b>H2</b></td><td>Los de menos recorrido reportan más dificultad</td></tr>
+              <tr><td class="num"><b>P6 × P21</b><br>antigüedad × conocimiento de cachés</td><td><b>H3</b></td><td>Los emergentes conocen menos el mercado</td></tr>
+              <tr><td class="num"><b>P8 × P19</b><br>fechas/año × caché</td><td>§5E, §6G</td><td>Relación volumen–precio; define los tramos de precio</td></tr>
+              <tr><td class="num"><b>P9 × P24</b><br>dedicación × interés</td><td>§5D</td><td>Qué segmento es el early adopter</td></tr>
+              <tr><td class="num"><b>P24 × P28</b><br>interés × disposición a pagar</td><td><b>H4</b></td><td>Brecha entre interés declarado y pago</td></tr>
+              <tr><td class="num"><b>P11 × P15</b><br>dependencia de contactos × dificultad</td><td><b>H1</b></td><td>Correlación entre red cerrada y dolor</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:18px">
+          <div class="note__t">Regla de honestidad analítica</div>
+          <p>
+            Las hipótesis que <b>no</b> se confirmen se reportan igual. Un plan de negocios que solo
+            encuentra datos a favor de su propia idea es un plan que no investigó: hizo marketing.
+            <b>Un hallazgo en contra, bien explicado y con la consecuencia asumida en el modelo, vale más
+            nota que uno a favor.</b>
+          </p>
+        </div>
+
+        <h3 style="margin-top:30px;margin-bottom:8px">Cómo llegar a 160–200 respuestas</h3>
+        <p style="color:var(--fg-muted);max-width:70ch;margin-bottom:16px">
+          Es la parte que más se subestima. Una encuesta publicada sin plan de difusión junta 30 respuestas
+          y frena. Con dos personas, son <b>80–100 cada uno</b>.
+        </p>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Canal</th><th>Meta</th><th>Nota</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td><b>Semilla propia</b> — contactos directos por DM, uno por uno</td><td class="num">30–40</td><td>La tasa de respuesta al pedido personal es muy superior a la del posteo</td></tr>
+              <tr><td class="num">2</td><td><b>Instagram de Beatmatch</b> — posteo + stories, link en bio</td><td class="num">40–60</td><td>Pedir a cada DJ que responde que lo comparta (bola de nieve)</td></tr>
+              <tr><td class="num">3</td><td><b>Grupos de WhatsApp/Telegram</b> de la escena</td><td class="num">40–60</td><td>El canal de mayor rendimiento. Pedir a los entrevistados de §5A que lo compartan en los suyos</td></tr>
+              <tr><td class="num">4</td><td><b>Escuelas y cursos de DJ</b></td><td class="num">30–40</td><td>Concentran emergentes — el segmento que más cuesta alcanzar y el más relevante para H2</td></tr>
+              <tr><td class="num">5</td><td><b>Presencial en eventos</b> — QR impreso</td><td class="num">—</td><td>Rinde poco por esfuerzo, pero suma casos de un perfil distinto</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:13.5px;color:var(--fg-muted);margin-top:12px;max-width:70ch">
+          <b>Seguimiento:</b> planilla con canal → respuestas por día. Si un canal no rinde a las 48 hs,
+          reasignar esfuerzo en vez de insistir.
+        </p>
+      </section>
+
+      <!-- ══════════ TÉCNICO ══════════ -->
+      <section class="sec" id="tecnico">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§7A + §7B · 2–4 carillas</span>
+            <span class="pill pill--warn">Borrador</span>
+          </div>
+          <h2>Estudio técnico</h2>
+          <p class="sec__desc">
+            La guía pide un BOM o listado de materiales. <b>Beatmatch no produce un bien físico</b>, así que
+            no aplica: se lo reemplaza por un listado de requerimientos y el proceso productivo por el
+            diagrama de flujo del servicio. <b>Explicitar esa adaptación en el trabajo</b> en lugar de
+            forzar un BOM inexistente — es la adaptación estándar para servicios y demuestra comprensión del
+            modelo.
+          </p>
+        </div>
+
+        <h3 style="margin-bottom:12px">Infraestructura tecnológica</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Componente</th><th>Solución</th><th>MVP</th><th>Al escalar</th><th>Verif.</th></tr></thead>
+            <tbody>
+              <tr><td>Framework de aplicación</td><td><b>Next.js 15</b></td><td class="num">USD 0</td><td class="num">USD 0</td><td>—</td></tr>
+              <tr><td>Base de datos, auth y storage</td><td><b>Supabase</b> (PostgreSQL)</td><td class="num">USD 0</td><td class="num">~USD 25/mes</td><td><span class="tag-v">[V-22]</span></td></tr>
+              <tr><td>Hosting y despliegue</td><td><b>Vercel</b></td><td class="num">USD 0</td><td class="num">~USD 20/mes</td><td><span class="tag-v">[V-23]</span></td></tr>
+              <tr><td>Correo transaccional</td><td><b>Resend</b></td><td class="num">USD 0</td><td class="num">~USD 20/mes</td><td><span class="tag-v">[V-24]</span></td></tr>
+              <tr><td>Dominio</td><td><code>.ar</code> / <code>.com.ar</code></td><td class="num">~USD 10–25/año</td><td class="num">igual</td><td><span class="tag-v">[V-25]</span></td></tr>
+              <tr><td>Analítica</td><td>Plausible / Umami</td><td class="num">USD 0–9/mes</td><td class="num">igual</td><td><span class="tag-v">[V-26]</span></td></tr>
+              <tr><td>Control de versiones</td><td>GitHub</td><td class="num">USD 0</td><td class="num">USD 0</td><td>—</td></tr>
+              <tr><td>Diseño</td><td>Figma</td><td class="num">USD 0 <span style="font-size:.9em">(plan educativo)</span></td><td class="num">igual</td><td><span class="tag-v">[V-27]</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note note--sync" style="margin-top:16px">
+          <div class="note__t">Lectura económica</div>
+          <p>
+            Costo tecnológico total del MVP: <b>USD 0 mensuales</b>, más el dominio anual. Eso es un
+            hallazgo relevante para §9: <b>la inversión inicial de Beatmatch no es de capital sino de
+            tiempo.</b> El punto de equilibrio no lo define la infraestructura sino el costo de oportunidad
+            de las horas del equipo. <b>El riesgo del proyecto tampoco es financiero: es de ejecución.</b>
+          </p>
+        </div>
+
+        <h3 style="margin-top:30px;margin-bottom:12px">Requerimientos funcionales del MVP</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Requerimiento</th><th>Descripción</th><th>Prioridad</th></tr></thead>
+            <tbody>
+              <tr><td class="num">RF-01</td><td><b>Registro y autenticación</b></td><td>Alta por enlace mágico, con elección de rol (DJ / productora)</td><td><span class="pill pill--crit">Alta</span></td></tr>
+              <tr><td class="num">RF-02</td><td><b>Perfil de DJ</b></td><td>Nombre artístico, foto, bio, estilos, ciudad, rango de caché, enlaces a sets, rider</td><td><span class="pill pill--crit">Alta</span></td></tr>
+              <tr><td class="num">RF-03</td><td><b>Perfil público con URL propia</b></td><td>Indexable y compartible como presskit</td><td><span class="pill pill--crit">Alta</span></td></tr>
+              <tr><td class="num">RF-04</td><td><b>Buscador con filtros</b></td><td>Estilo, ciudad y rango de caché; resultados en tarjetas</td><td><span class="pill pill--crit">Alta</span></td></tr>
+              <tr><td class="num">RF-05</td><td><b>Formulario de contacto</b></td><td>Fecha, tipo de evento, presupuesto, mensaje; se guarda y notifica</td><td><span class="pill pill--crit">Alta</span></td></tr>
+              <tr><td class="num">RF-06</td><td><b>Moderación</b></td><td>Estado pendiente → publicado, con aprobación manual</td><td><span class="pill pill--crit">Alta</span></td></tr>
+              <tr><td class="num">RF-07</td><td><b>Panel del usuario</b></td><td>DJ edita perfil y ve contactos; productora ve los enviados</td><td><span class="pill pill--warn">Media</span></td></tr>
+              <tr><td class="num">RF-08</td><td><b>Favoritos</b></td><td>La productora guarda DJs de interés</td><td><span class="pill">Baja</span></td></tr>
+              <tr><td class="num">RF-09</td><td><b>Consentimiento de datos</b></td><td>Casilla de aceptación de política de privacidad en el registro</td><td><span class="pill pill--crit">Alta</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:16px">
+          <div class="note__t">RF-09 · deuda del producto en vivo</div>
+          <p>
+            El formulario de la Fase 01 <b>ya publicado</b> capta nombre, apellido, fecha de nacimiento y
+            enlaces <b>sin casilla de consentimiento ni política de privacidad</b>. Es una obligación legal y
+            su costo de resolución es bajo. Conviene señalarlo en el trabajo como acción correctiva
+            identificada por el propio análisis: <b>muestra que el estudio técnico sirvió para algo.</b>
+          </p>
+        </div>
+
+        <h3 style="margin-top:26px;margin-bottom:12px">Lo que queda afuera, y por qué</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Excluido</th><th>Razón</th></tr></thead>
+            <tbody>
+              <tr><td><b>Chat en tiempo real</b></td><td>El correo alcanza para validar. Un chat vacío transmite sensación de producto abandonado</td></tr>
+              <tr><td><b>Calendario de disponibilidad</b></td><td>Los DJs no lo mantendrían actualizado; el campo «fecha del evento» resuelve lo mismo</td></tr>
+              <tr><td><b>Pagos en plataforma</b></td><td>Corresponde a Fase 03</td></tr>
+              <tr><td><b>Sistema de reseñas</b></td><td>Sin bookings concretados no hay qué reseñar</td></tr>
+              <tr><td><b>App móvil nativa</b></td><td>La web responsiva cubre el caso: el tráfico será mayoritariamente móvil pero por navegador</td></tr>
+              <tr><td><b>Recomendación automática</b></td><td>Requiere datos históricos de qué contrata quién. Primero búsqueda manual</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:30px;margin-bottom:12px">§7B · Diagrama de flujo del servicio</h3>
+        <div class="dia">
+<pre class="mermaid">
+flowchart TD
+    A([DJ conoce Beatmatch]) --&gt; B[Se registra con su correo]
+    B --&gt; C[Completa su perfil]
+    C --&gt; D{¿Perfil completo?}
+    D --&gt;|No| C1[Recordatorio por correo]
+    C1 --&gt; C
+    D --&gt;|Sí| E[Estado PENDIENTE]
+    E --&gt; F{Moderación}
+    F --&gt;|Rechazado| F1[Aviso con motivo]
+    F1 --&gt; C
+    F --&gt;|Aprobado| G[(Perfil PUBLICADO)]
+    H([Productora necesita un DJ]) --&gt; I[Se registra]
+    I --&gt; J[Accede al buscador]
+    J --&gt; K[Filtra: estilo, ciudad, caché]
+    K --&gt; G
+    G --&gt; L[Ve resultados y escucha sets]
+    L --&gt; M{¿Encuentra candidato?}
+    M --&gt;|No| K
+    M --&gt;|Sí| N[Envía contacto]
+    N --&gt; O[(Tabla CONTACTOS)]
+    O --&gt; P[Aviso al DJ]
+    P --&gt; Q{¿El DJ responde?}
+    Q --&gt;|No en 48 h| Q1[Recordatorio]
+    Q1 --&gt; Q
+    Q --&gt;|Sí| R[Negociación directa]
+    R --&gt; S{¿Se cierra?}
+    S --&gt;|No| T([CAÍDO])
+    S --&gt;|Sí| U([CONCRETADO])
+    U --&gt; V[Seguimiento manual]
+    V --&gt; W[(Inteligencia de mercado)]
+    style G fill:#FF5B26,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style O fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style W fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style U fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style T fill:#8B8B94,stroke:#0A0A0D,color:#0A0A0D
+</pre>
+        </div>
+
+        <div class="prose" style="margin-top:22px">
+          <h4>Lectura del diagrama</h4>
+          <p>
+            <b>Dos flujos que convergen en un punto.</b> Se ven los dos lados del mercado como recorridos
+            independientes que se encuentran en el archivo de perfiles publicados — y eso hace visible el
+            <b>problema del huevo y la gallina</b>: si el flujo de la izquierda no produce suficientes
+            perfiles, el de la derecha se interrumpe en «no encuentra candidato» y la productora abandona.
+            Es la justificación operativa de construir oferta antes de abrir la búsqueda.
+          </p>
+          <p>
+            <b>El único control de calidad es la moderación.</b> Al no haber producto físico, el equivalente
+            funcional del control de calidad es la aprobación manual del perfil. Es también el único paso
+            que no escala.
+          </p>
+          <p>
+            <b>El proceso no termina en el acuerdo.</b> El tramo final —seguimiento manual, actualización
+            del estado— no le entrega valor al usuario: <b>le entrega inteligencia de mercado a la
+            empresa</b>. Quién contrata a quién, a qué precio y para qué tipo de evento. Sin ese registro no
+            hay forma de fijar la comisión de la Fase 03 con fundamento.
+          </p>
+          <p>
+            <b>Los reintentos son parte del diseño.</b> Los ciclos de recordatorio no son manejo de errores:
+            son los dos puntos donde el servicio se cae en la práctica. Explicitarlos es lo que distingue un
+            flujo real de un diagrama de folleto.
+          </p>
+        </div>
+
+        <h3 style="margin-top:28px;margin-bottom:12px">Puntos críticos del proceso</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Punto</th><th>Riesgo</th><th>Mitigación</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td>Completar el perfil</td><td>Se registra y abandona antes de terminar</td><td>Barra de progreso; el perfil público como presskit es incentivo propio; recordatorio</td></tr>
+              <tr><td class="num">2</td><td>Moderación</td><td>Cuello de botella manual; la demora desalienta</td><td>Objetivo de 24 h; verificación automática de enlaces</td></tr>
+              <tr><td class="num">3</td><td>Búsqueda sin resultados</td><td>Sin densidad, la productora se va y no vuelve</td><td>No abrir Fase 02 antes de la masa crítica; concierge manual al inicio</td></tr>
+              <tr><td class="num">4</td><td>Respuesta del DJ</td><td>Si no responde, la productora vuelve a WhatsApp</td><td>Recordatorio a 48 h; indicador de tasa de respuesta en el perfil</td></tr>
+              <tr><td class="num">5</td><td>Cierre fuera de la plataforma</td><td>Desintermediación: se pierde el dato del resultado</td><td>Aceptada en Fases 01–02. Se mitiga en Fase 03 con valor real dentro: seña protegida, reseñas, historial</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:28px;margin-bottom:12px">Evolución a la Fase 03</h3>
+        <div class="dia">
+<pre class="mermaid">
+flowchart LR
+    A[Contacto enviado] --&gt; B[Propuesta formal]
+    B --&gt; C{¿Acepta el DJ?}
+    C --&gt;|No| D([Caído])
+    C --&gt;|Sí| E[Productora paga la seña]
+    E --&gt; F[(Seña retenida)]
+    F --&gt; G[Se realiza el evento]
+    G --&gt; H[Pago al DJ menos comisión]
+    H --&gt; I[Reseña bidireccional]
+    I --&gt; J([Historial verificado])
+    style F fill:#FF5B26,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style H fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+    style J fill:#C8FF4D,stroke:#0A0A0D,stroke-width:2px,color:#0A0A0D
+</pre>
+        </div>
+        <div class="note note--sync" style="margin-top:16px">
+          <div class="note__t">Por qué la seña es el nudo del modelo</div>
+          <p>
+            <b>La retención de la seña resuelve simultáneamente los tres problemas de confianza del
+            mercado:</b> el DJ que no se presenta, la productora que no paga, y la desintermediación. Es el
+            momento en que la plataforma pasa de ser un directorio a ser infraestructura de la transacción
+            — y es también el momento en que empieza a poder cobrar, porque recién ahí aporta algo que
+            WhatsApp no puede replicar.
+          </p>
+        </div>
+
+        <div class="note" style="margin-top:16px">
+          <div class="note__t">Requerimientos humanos · el dato que falta</div>
+          <p>
+            Desarrollo 15 h/sem · diseño 5 · moderación 3 · reclutamiento y contenidos 8 · atención 4 =
+            <b>~35 h semanales repartidas entre dos personas</b>. Ese número tiene que viajar a §9 como costo
+            de mano de obra, aunque no se remunere en el año 1.
+            <b>Un plan que valúa en cero el trabajo de sus fundadores está mal hecho.</b>
+          </p>
+        </div>
+      </section>
+
+      <!-- ══════════ JURÍDICA ══════════ -->
+      <section class="sec" id="juridica">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§8A · ½ carilla</span>
+            <span class="pill pill--warn">Borrador · cuadro de costos vacío a propósito</span>
+          </div>
+          <h2>Estructura jurídica</h2>
+        </div>
+
+        <div class="alert" style="margin-top:0;margin-bottom:24px">
+          <div class="alert__t">Sección de mayor riesgo de desactualización</div>
+          <p>
+            El régimen societario, los costos de constitución y en particular <b>la situación de la SAS en
+            jurisdicción de CABA</b> fueron objeto de sucesivas modificaciones normativas y de criterios
+            cambiantes del organismo de contralor. <b>Nada de esto debe darse por vigente sin
+            confirmarlo</b> — y la jurisdicción cambia el resultado: constituir en Provincia (DPPJ) y en
+            CABA (IGJ) tiene requisitos, plazos y costos distintos.
+          </p>
+        </div>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th></th><th>SAS</th><th>SRL</th><th>SA</th></tr></thead>
+            <tbody>
+              <tr><td><b>Norma</b></td><td>Ley 27.349 <span class="tag-v">[V-19]</span></td><td>Ley 19.550</td><td>Ley 19.550</td></tr>
+              <tr><td><b>Socios mínimos</b></td><td class="num">1</td><td class="num">2</td><td class="num">2</td></tr>
+              <tr><td><b>Responsabilidad</b></td><td colspan="3" style="text-align:center">Limitada al capital suscripto en los tres casos</td></tr>
+              <tr><td><b>Constitución</b></td><td>Instrumento público o privado; <b>admite firma digital</b> <span class="tag-v">[V-28]</span></td><td>Público o privado con firma certificada</td><td><b>Requiere escritura pública</b></td></tr>
+              <tr><td><b>Plazo de inscripción</b></td><td><b>El más breve</b> <span class="tag-v">[V-29]</span></td><td>Intermedio</td><td>El más extenso</td></tr>
+              <tr><td><b>Costo relativo</b></td><td><b>El más bajo</b></td><td>Intermedio</td><td>El más alto</td></tr>
+              <tr><td><b>Administración</b></td><td>Flexible, definida en el estatuto</td><td>Gerencia</td><td>Directorio y sindicatura</td></tr>
+              <tr><td><b>Apta para inversión</b></td><td><b>Alta</b> — fue diseñada para eso</td><td>Baja</td><td>Alta, con estructura costosa</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="prose" style="margin-top:24px">
+          <h4>Recomendación · SAS, condicionada</h4>
+          <p>
+            Beatmatch es un emprendimiento de base tecnológica, con inversión inicial cercana a cero, equipo
+            reducido y horizonte de incorporar socios si escala. La SAS es la figura diseñada para ese
+            perfil. Cuatro argumentos: <b>limitación de responsabilidad</b> —la razón principal para
+            constituir sociedad, sobre todo cuando en Fase 03 se van a retener fondos de terceros—,
+            <b>costo y velocidad</b>, <b>flexibilidad estatutaria</b> —poder pactar el esquema de
+            participación y de salida evita el conflicto societario más frecuente entre fundadores— y
+            <b>aptitud para recibir inversión</b>.
+          </p>
+          <div class="note">
+            <div class="note__t">Contraargumento que el trabajo debe reconocer</div>
+            <p>
+              La SAS estuvo sujeta a mayor incertidumbre regulatoria que la SRL, sobre todo en CABA. Si al
+              momento de constituir esa incertidumbre persiste, <b>la SRL es la alternativa razonable</b>:
+              más cara y más lenta, pero con régimen estable. La recomendación es por lo tanto
+              <b>condicional a verificar</b> <span class="tag-v">[V-30]</span>. Plantearlo así, en vez de
+              afirmar la SAS sin matices, es lo que distingue una recomendación fundada de una copiada.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="margin-top:28px;margin-bottom:12px">Cuándo constituir</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Momento</th><th>Figura</th><th>Fundamento</th></tr></thead>
+            <tbody>
+              <tr><td><b>Fases 01–02</b><br>validación, sin ingresos</td><td><b>Sin constituir</b></td><td>Genera obligaciones fiscales y contables sin contrapartida, y consume recursos que el proyecto necesita en el reclutamiento de DJs</td></tr>
+              <tr><td><b>Antes de la primera comisión</b><br>Fase 03</td><td><b>Constitución de la SAS</b></td><td>Desde que se cobra a terceros y se retienen fondos, operar sin sociedad expone el patrimonio personal y no es viable fiscalmente</td></tr>
+              <tr><td><b>Fase 04</b><br>expansión</td><td>La SAS ya constituida absorbe el crecimiento</td><td>No requiere cambio de figura</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note note--sync" style="margin-top:16px">
+          <div class="note__t">Consecuencia para §9</div>
+          <p>
+            Los costos de constitución y mantenimiento societario <b>no son un costo del año 1</b>: se
+            imputan al ejercicio en que arranca la monetización. Ubicarlos correctamente en el tiempo
+            <b>cambia el punto de equilibrio del primer año</b>.
+          </p>
+        </div>
+
+        <h3 style="margin-top:28px;margin-bottom:8px">Costos · a completar con datos verificados</h3>
+        <p style="color:var(--fg-muted);max-width:70ch;margin-bottom:14px">
+          No incluyo importes estimados a propósito: <b>un cuadro de costos con cifras no verificadas es
+          peor que uno vacío, porque parece información.</b>
+        </p>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Concepto</th><th>Organismo</th><th>Importe</th><th>Fecha</th><th>Verif.</th></tr></thead>
+            <tbody>
+              <tr><td>Tasa de constitución</td><td>IGJ o DPPJ</td><td></td><td></td><td><span class="tag-v">[V-30]</span></td></tr>
+              <tr><td>Publicación edictal</td><td>Boletín Oficial</td><td></td><td></td><td><span class="tag-v">[V-31]</span></td></tr>
+              <tr><td>Certificación de firmas</td><td>Escribanía / banco</td><td></td><td></td><td>—</td></tr>
+              <tr><td>Capital social a integrar (25% si es en efectivo)</td><td>—</td><td></td><td></td><td><span class="tag-v">[V-28]</span></td></tr>
+              <tr><td>Rúbrica de libros</td><td>Organismo de contralor</td><td></td><td></td><td><span class="tag-v">[V-30]</span></td></tr>
+              <tr><td>Inscripción fiscal (CUIT, IVA, IIBB)</td><td>ARCA · AGIP / ARBA</td><td></td><td></td><td><span class="tag-v">[V-32]</span></td></tr>
+              <tr><td><b>Honorarios contables mensuales</b></td><td>Profesional independiente</td><td></td><td></td><td>cotizar</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:13.5px;color:var(--fg-muted);margin-top:12px;max-width:70ch">
+          <b>Cómo completarlo:</b> el nomenclador de tasas vigente está en la web del organismo de contralor.
+          Para los honorarios contables, pedir dos o tres cotizaciones reales — es un dato que se consigue
+          con una llamada y <b>le da al trabajo una precisión que ningún cuadro copiado tiene</b>.
+        </p>
+
+        <h3 style="margin-top:28px;margin-bottom:12px">Otras definiciones jurídicas pendientes</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Definición</th><th>Estado</th><th>Prioridad</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td><b>Registro de la marca «Beatmatch» ante el INPI</b></td><td>Disponibilidad sin verificar</td><td><span class="pill pill--crit">Alta</span> Antes de invertir en posicionamiento</td></tr>
+              <tr><td class="num">2</td><td>Dominio y usuario de Instagram</td><td>Pendiente</td><td><span class="pill pill--crit">Alta</span> Se define junto con la marca</td></tr>
+              <tr><td class="num">3</td><td><b>Política de privacidad</b> (Ley 25.326)</td><td><b>Inexistente</b> — el formulario ya capta datos sin consentimiento</td><td><span class="pill pill--crit">Alta</span> Incumplimiento vigente</td></tr>
+              <tr><td class="num">4</td><td>Términos y condiciones de uso</td><td>Inexistente</td><td><span class="pill pill--warn">Media</span> Antes de Fase 02</td></tr>
+              <tr><td class="num">5</td><td>Responsabilidad del intermediario ante incumplimiento</td><td>Sin definir</td><td><span class="pill pill--warn">Media</span> Crítica en Fase 03</td></tr>
+              <tr><td class="num">6</td><td>Acuerdo de socios entre Gastón y Cani</td><td>Sin definir</td><td><span class="pill pill--warn">Media</span> Junto con la constitución</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:13.5px;color:var(--fg-muted);margin-top:12px;max-width:70ch">
+          Los puntos <b>1 y 3 son los únicos con impacto inmediato</b>: uno protege un activo que se está
+          construyendo, el otro corrige un incumplimiento vigente. Los demás pueden esperar a la Fase 02.
+        </p>
+      </section>
+
+      <!-- ══════════ FUENTES ══════════ -->
+      <section class="sec" id="fuentes">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">Control interno · no va a la entrega</span>
+            <span class="pill pill--crit">0 de 32 verificadas</span>
+          </div>
+          <h2>Las 32 fuentes</h2>
+          <p class="sec__desc">
+            Por cada fila: abrir la URL, confirmar cifra, unidad, período y organismo autor, anotar la cita
+            APA. <b>Siempre preferir la fuente primaria</b> —el informe del organismo— sobre la nota
+            periodística que lo comenta. Varias filas tienen como candidata un medio justamente porque fue
+            lo que devolvió el buscador: hay que remontarse al organismo.
+          </p>
+        </div>
+
+        <div class="grid3" style="margin-bottom:22px">
+          <div class="card" style="border-color:var(--st-crit)">
+            <span class="pill pill--crit">Riesgo máximo</span>
+            <h3>V-09 · V-11 · V-12</h3>
+            <p style="font-size:14px;color:var(--fg-muted)">El dato de penetración de internet (90,1%) <b style="color:var(--fg)">probablemente no sea de ENACOM</b> sino de DataReportal / We Are Social. Determinar quién lo produjo antes de citarlo.</p>
+          </div>
+          <div class="card" style="border-color:var(--st-crit)">
+            <span class="pill pill--crit">Riesgo máximo</span>
+            <h3>V-16 · arancel SADAIC</h3>
+            <p style="font-size:14px;color:var(--fg-muted)">Los porcentajes que devolvió la búsqueda —16%, 20%, 15%, 10%— <b style="color:var(--fg)">son inconsistentes entre sí</b>. No usar ninguno sin confirmar en el nomenclador.</p>
+          </div>
+          <div class="card" style="border-color:var(--st-crit)">
+            <span class="pill pill--crit">Riesgo máximo</span>
+            <h3>V-30 · SAS ante IGJ</h3>
+            <p style="font-size:14px;color:var(--fg-muted)">Hubo resoluciones que modificaron los requisitos para SAS en CABA, con criterios que cambiaron más de una vez. <b style="color:var(--fg)">Condiciona toda la recomendación de §8A.</b></p>
+          </div>
+        </div>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>ID</th><th>Dato a verificar</th><th>Dónde buscar</th><th>Qué confirmar</th></tr></thead>
+            <tbody>
+              <tr><td class="tag-v">V-01</td><td>Ley 5688 Título XIII — seguridad en locales de baile, CABA</td><td>boletinoficial.buenosaires.gob.ar</td><td>Que sea el Título correcto, que esté vigente, número de artículo</td></tr>
+              <tr><td class="tag-v">V-02</td><td>Ley 26.370 — control de admisión y permanencia</td><td>InfoLEG</td><td>Objeto de la ley y vigencia</td></tr>
+              <tr><td class="tag-v">V-03</td><td>Registro Público de Lugares Bailables y sus requisitos</td><td>buenosaires.gob.ar</td><td>Requisitos vigentes: seguro, bomberos, servicio médico, libre deuda</td></tr>
+              <tr><td class="tag-v">V-04</td><td>IPC mayo 2026: 2,1% · 14,7% acum. · 33,2% i.a.</td><td>INDEC, informe de prensa</td><td><b>Las tres cifras, una por una.</b> Es el dato más citado y el más fácil de refutar si está mal</td></tr>
+              <tr><td class="tag-v">V-05</td><td>IPC junio 2026: Recreación y cultura +4,2%</td><td>INDEC, informe de prensa</td><td>La cifra y que haya sido efectivamente <b>la mayor</b> división del mes</td></tr>
+              <tr><td class="tag-v">V-06</td><td>Las 12 divisiones de la canasta del IPC</td><td>INDEC, metodología</td><td>Nomenclatura exacta</td></tr>
+              <tr><td class="tag-v">V-07</td><td>ENCC — única encuesta oficial; ediciones 2013, 2017, 2022</td><td>SInCA</td><td>Años y organismo. <b>Verificar si hay edición posterior a 2022</b></td></tr>
+              <tr><td class="tag-v">V-08</td><td>Asistencia a recitales / música en vivo</td><td>datos.cultura.gob.ar</td><td><b>Dato a buscar, no a confirmar.</b> Es el hueco más grande del PESTEL y alimenta §5E</td></tr>
+              <tr><td class="tag-v">V-09</td><td>41,2 M usuarios de internet = 90,1% de la población</td><td>⚠ Buscar la primaria</td><td><b>Probablemente DataReportal, no ENACOM.</b> Identificar autor antes de citar</td></tr>
+              <tr><td class="tag-v">V-10</td><td>64,7 M líneas móviles = 141%</td><td>indicadores.enacom.gob.ar</td><td>Cifra y trimestre de referencia</td></tr>
+              <tr><td class="tag-v">V-11</td><td>32,2 M identidades activas en redes (enero 2025)</td><td>⚠ Sin identificar</td><td><b>Casi con seguridad DataReportal.</b> Citarlo como tal o no usarlo</td></tr>
+              <tr><td class="tag-v">V-12</td><td>Brecha digital: 9,9% sin acceso</td><td>Idem V-09</td><td>Confirmar autoría junto con V-09</td></tr>
+              <tr><td class="tag-v">V-13</td><td>ENACOM publica indicadores TIC trimestrales</td><td>enacom.gob.ar</td><td>Periodicidad y último informe disponible</td></tr>
+              <tr><td class="tag-v">V-14</td><td>Adopción de billeteras virtuales</td><td>⚠ Sin fuente candidata</td><td>Probar informes del BCRA sobre medios de pago</td></tr>
+              <tr><td class="tag-v">V-15</td><td>Nuevo marco de derechos de autor / rol de SADAIC</td><td>argentina.gob.ar → Boletín Oficial</td><td><b>Número de decreto o resolución y fecha.</b> Citar la norma, no la gacetilla de prensa</td></tr>
+              <tr><td class="tag-v">V-16</td><td>Arancel a locales bailables sobre venta de entradas</td><td>Nomenclador SADAIC</td><td>⚠ Los porcentajes hallados son <b>inconsistentes entre sí</b></td></tr>
+              <tr><td class="tag-v">V-17</td><td>Ley 25.326 de Protección de Datos Personales</td><td>InfoLEG</td><td>Vigencia y artículos sobre registro de bases</td></tr>
+              <tr><td class="tag-v">V-18</td><td>Ley 24.240 de Defensa del Consumidor</td><td>InfoLEG</td><td>Aplicabilidad a plataformas digitales</td></tr>
+              <tr><td class="tag-v">V-19</td><td>Ley 27.349 — creación de la SAS</td><td>InfoLEG, texto actualizado</td><td>Vigencia de los artículos sobre SAS</td></tr>
+              <tr><td class="tag-v">V-20</td><td>Djaayz, AGNT, DJClub.pro, Songlive</td><td>Sitio de cada plataforma</td><td>Que existan, dónde operan, <b>y que no operen en Argentina</b>. Captura con fecha</td></tr>
+              <tr><td class="tag-v">V-21</td><td>No hay plataforma de booking de DJs en Argentina</td><td>Búsqueda propia</td><td><b>Afirmación negativa: no se puede probar, solo respaldar.</b> Documentar términos y fecha. Redactar «no se identificaron plataformas…», nunca «no existen»</td></tr>
+              <tr><td class="tag-v">V-22</td><td>Supabase — nivel gratuito y primer plan pago</td><td>supabase.com/pricing</td><td>Precio + fecha de consulta</td></tr>
+              <tr><td class="tag-v">V-23</td><td>Vercel — Hobby y Pro</td><td>vercel.com/pricing</td><td>Precio + fecha</td></tr>
+              <tr><td class="tag-v">V-24</td><td>Resend — límite del nivel gratuito</td><td>resend.com/pricing</td><td>Precio + fecha</td></tr>
+              <tr><td class="tag-v">V-25</td><td>Dominio <code>.ar</code> / <code>.com.ar</code></td><td>nic.ar</td><td>Arancel anual + fecha</td></tr>
+              <tr><td class="tag-v">V-26</td><td>Plausible / Umami</td><td>plausible.io</td><td>Precio + fecha</td></tr>
+              <tr><td class="tag-v">V-27</td><td>Figma — plan educativo</td><td>figma.com/education</td><td>Condiciones + fecha</td></tr>
+              <tr><td class="tag-v">V-28</td><td>Requisitos de constitución de la SAS</td><td>argentina.gob.ar/derechofacil</td><td>Instrumento, certificación de firmas, integración del 25%</td></tr>
+              <tr><td class="tag-v">V-29</td><td>Plazo de inscripción de la SAS</td><td>Organismo de contralor</td><td><b>Plazo real, no el teórico</b></td></tr>
+              <tr><td class="tag-v">V-30</td><td><b>Situación de la SAS en CABA ante la IGJ + aranceles</b></td><td>igj.gob.ar</td><td>🚨 <b>La más importante de la sección.</b> Confirmar estado actual antes de recomendar la figura</td></tr>
+              <tr><td class="tag-v">V-31</td><td>Costo de publicación edictal</td><td>boletinoficial.gob.ar</td><td>Arancel vigente + fecha</td></tr>
+              <tr><td class="tag-v">V-32</td><td>Inscripción fiscal: CUIT, IVA, IIBB</td><td>ARCA · AGIP o ARBA</td><td>Trámites y costos según jurisdicción</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:30px;margin-bottom:8px">Datos que el Plan necesita y no tienen fuente</h3>
+        <p style="color:var(--fg-muted);max-width:70ch;margin-bottom:14px">
+          Antes de gastar tiempo buscándolos, evaluar si conviene reemplazarlos por evidencia primaria del
+          propio trabajo de campo.
+        </p>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Dato</th><th>Sección</th><th>Alternativa si no se consigue</th></tr></thead>
+            <tbody>
+              <tr><td><b>Tamaño del mercado de eventos</b></td><td>§5E</td><td>Estimación bottom-up: locales habilitados × eventos/semana × DJs/evento. <b>Documentar cada supuesto.</b> Una estimación propia bien fundada vale más que un número sin fuente</td></tr>
+              <tr><td><b>Cantidad de DJs activos en Argentina</b></td><td>§5E</td><td>Bottom-up desde seguidores de cuentas de la escena, egresados de escuelas, o line-ups publicados en un período</td></tr>
+              <tr><td><b>Cachés de referencia del mercado</b></td><td>§6G</td><td><b>Evidencia propia: P19 de la encuesta.</b> Es el aporte original del trabajo y no existe en ninguna fuente pública</td></tr>
+              <tr><td><b>Locales bailables habilitados en CABA</b></td><td>§5E</td><td>Registro Público de Lugares Bailables, si publica el padrón</td></tr>
+              <tr><td><b>Adopción de billeteras virtuales</b></td><td>§4A</td><td>Informes del BCRA sobre medios de pago</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note note--sync" style="margin-top:18px">
+          <div class="note__t">Observación estratégica</div>
+          <p>
+            Que estos datos no existan públicamente <b>no es una debilidad del trabajo: es el hallazgo
+            central del análisis del entorno.</b> Un mercado sin estadísticas es un mercado sin
+            transparencia — que es exactamente el problema que Beatmatch dice resolver.
+            <b>Escribirlo así convierte una limitación metodológica en un argumento del plan.</b>
+          </p>
+        </div>
+      </section>
+
+      <!-- ══════════ ANEXO ══════════ -->
+      <section class="sec" id="anexo">
+        <div class="sec__head">
+          <div class="sec__meta">
+            <span class="eyebrow">§11 · Anexo obligatorio</span>
+            <span class="pill pill--warn">Iniciado</span>
+          </div>
+          <h2>Declaración de uso de IA</h2>
+          <p class="sec__desc">
+            La consigna exige entregar <b>el detalle de lo que se preguntó y la respuesta, con fecha y
+            nombre de la IA</b>. Herramienta utilizada: Claude (Anthropic), vía Claude Code.
+          </p>
+        </div>
+
+        <div class="note">
+          <div class="note__t">⚠ Esta declaración solo es válida si es cierta</div>
+          <p>
+            Si se pega texto generado sin reelaborar, hay que decirlo, o no usarlo. <b>El cuerpo del Plan
+            debe ser análisis propio.</b>
+          </p>
+        </div>
+
+        <h3 style="margin-top:24px;margin-bottom:12px">Registro de consultas</h3>
+        <div class="tw">
+          <table>
+            <thead><tr><th>#</th><th>Fecha</th><th>Sección</th><th>Qué se preguntó</th><th>Qué se hizo con la respuesta</th></tr></thead>
+            <tbody>
+              <tr><td class="num">1</td><td class="num">29·07·26</td><td>Estructura general</td><td>Mapear la consigna a un índice con extensiones, responsables y dependencias</td><td>Documento interno de control. No forma parte de la entrega</td></tr>
+              <tr><td class="num">2</td><td class="num">29·07·26</td><td>§4A</td><td>Relevar fuentes secundarias sobre el contexto argentino aplicable al mercado de eventos y booking</td><td><i>(completar: qué se verificó, qué se descartó, qué se citó)</i></td></tr>
+              <tr><td class="num">3</td><td class="num">29·07·26</td><td>§5A</td><td>Guion de entrevistas para tres perfiles, con protocolo y grilla de análisis</td><td>Base del instrumento. Revisado y ajustado por el equipo, llevado a corrección antes de aplicarlo. Las entrevistas y su análisis son trabajo propio</td></tr>
+              <tr><td class="num">4</td><td class="num">29·07·26</td><td>§5B</td><td>Cuestionario para DJs con objetivos, hipótesis, plan de análisis y difusión</td><td>Idem. Los tramos de caché se recalibraron con lo surgido de las entrevistas</td></tr>
+              <tr><td class="num">5</td><td class="num">29·07·26</td><td>§4B</td><td>Estructurar las cinco fuerzas aplicadas a un marketplace de dos lados</td><td>Se usó la estructura. El diagnóstico se contrastó con las entrevistas y se reescribió con conclusiones propias</td></tr>
+              <tr><td class="num">6</td><td class="num">29·07·26</td><td>§7</td><td>Requerimientos técnicos y diagrama de flujo, en reemplazo del BOM</td><td>Base del apartado. Los precios se verificaron uno por uno en la web de cada proveedor, con fecha</td></tr>
+              <tr><td class="num">7</td><td class="num">29·07·26</td><td>§8A</td><td>Comparar SAS, SRL y SA y fundamentar la elección</td><td>Cuadro comparativo como punto de partida. <b>La normativa y los aranceles se verificaron en InfoLEG y en el organismo de contralor</b>, porque la IA advirtió que no podía acceder a ellos</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:20px">
+          <div class="note__t">Constancia de la limitación · va en el anexo</div>
+          <p>
+            La sesión del 29/07/2026 se realizó <b>con el acceso web restringido</b>: se pudo buscar y leer
+            resúmenes, pero no abrir ninguna página fuente (error 403 en INDEC, ENACOM, SInCA, Boletín
+            Oficial y medios). Por eso <b>ningún dato externo quedó citado directamente</b>: cada afirmación
+            se marcó <span class="tag-v">[V-##]</span> y se volcó a la planilla de verificación con la URL
+            candidata y el dato a confirmar.
+          </p>
+          <p>
+            Dejar constancia de esto forma parte del criterio de honestidad metodológica del trabajo:
+            <b>la IA relevó pistas, no fuentes.</b>
+          </p>
+        </div>
+
+        <div class="note note--sync" style="margin-top:14px">
+          <div class="note__t">Criterio de verificación · texto para el anexo</div>
+          <p>
+            <i>«Toda referencia sugerida por la IA se verificó abriendo la fuente original antes de
+            incorporarla. Las que no se pudieron verificar se descartaron.»</i> Esto no es opcional: los
+            modelos de lenguaje pueden generar citas que no existen o atribuir datos a fuentes equivocadas.
+            <b>Una referencia APA inventada en el cuerpo del trabajo es indistinguible de plagio para el
+            equipo docente</b> — y la sanción alcanza a los dos integrantes.
+          </p>
+        </div>
+      </section>
+
+      <!-- ══════════ FALTA ══════════ -->
+      <section class="sec" id="falta">
+        <div class="sec__head">
+          <span class="eyebrow">Honestidad de alcance</span>
+          <h2>Lo que falta</h2>
+          <p class="sec__desc">
+            Lo que todavía no está y por qué. Ninguna de estas se puede escribir sin un insumo que hoy no
+            existe.
+          </p>
+        </div>
+
+        <div class="tw">
+          <table>
+            <thead><tr><th>§</th><th>Sección</th><th>Qué falta para poder escribirla</th></tr></thead>
+            <tbody>
+              <tr><td class="num">4C</td><td><b>Análisis del equipo emprendedor</b></td><td>Formación, experiencia y roles de Gastón y Cani. <b>Solo lo pueden escribir ustedes</b> — es literalmente sobre ustedes</td></tr>
+              <tr><td class="num">4D · 4E</td><td><b>FODA y conclusiones</b></td><td>Depende de 4C. El puente PESTEL→FODA de esta consola ya adelanta las filas de oportunidades y amenazas; faltan fortalezas y debilidades, que salen del equipo</td></tr>
+              <tr><td class="num">5C · 5D · 5E</td><td><b>CANVAS de valor, User Persona, demanda</b></td><td>Trabajo de campo. Sin entrevistas ni encuesta no hay dolores ni vocabulario reales, y un persona inventado se nota</td></tr>
+              <tr><td class="num">6A–6G</td><td><b>Plan de marketing</b></td><td>Depende de 5C y 5B. La política de precios (6G) necesita la P19 de la encuesta</td></tr>
+              <tr><td class="num">8B</td><td><b>Estructura orgánica y organigrama</b></td><td>Depende de 4C. Con dos integrantes el organigrama es simple, pero necesita los roles definidos</td></tr>
+              <tr><td class="num">9</td><td><b>Plan económico-financiero</b></td><td>La planilla del docente y los objetivos comerciales de 6B. Las ~35 h semanales del §7 son el insumo de costo de mano de obra</td></tr>
+              <tr><td class="num">1 · 2</td><td><b>Resumen ejecutivo y CANVAS</b></td><td>Se escriben al final, por definición</td></tr>
+              <tr><td class="num">—</td><td><b>Número de grupo</b></td><td>Hace falta para la carátula y el nombre del archivo de entrega</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:20px">
+          <div class="note__t">Lo primero, esta semana</div>
+          <p>
+            <b>1.</b> Llevar los dos instrumentos a corrección docente y resolver ahí la decisión del <i>n</i>
+            de la encuesta. <b>2.</b> Agendar las tres entrevistas — es lo único que no se puede acelerar
+            después. <b>3.</b> Repartirse las 32 fuentes; los precios de servicios son media hora y las tres
+            filas de riesgo van con quien escriba cada sección.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    <p>Beatmatch · Plan de Negocios · Gastón · Cani</p>
+    <p>Consola de trabajo — no es el entregable</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var S=[
+    ["1","Resumen ejecutivo",4,"idle"],["2","CANVAS",4,"idle"],["3","Definición del negocio",16,"idle"],
+    ["4A","PESTEL",60,"warn"],["4B","Porter",58,"warn"],["4C","Equipo emprendedor",8,"idle"],
+    ["4D","FODA",18,"idle"],["4E","Conclusiones",4,"idle"],
+    ["5A","Entrevistas",40,"crit"],["5B","Encuesta",40,"crit"],["5C","CANVAS de valor",4,"idle"],
+    ["5D","User Persona",4,"idle"],["5E","Demanda",4,"idle"],
+    ["6A","Posicionamiento",6,"idle"],["6B","Objetivos 3 años",4,"idle"],["6C","Oferta y marca",34,"warn"],
+    ["6D","Distribución",4,"idle"],["6E","Equipo de ventas",4,"idle"],["6F","Comunicación",8,"idle"],
+    ["6G","Precios",4,"idle"],
+    ["7A","Requerimientos",70,"warn"],["7B","Flujo del servicio",68,"warn"],
+    ["8A","Estructura jurídica",55,"warn"],["8B","Organigrama",4,"idle"],
+    ["9","Económico-financiero",4,"idle"]
+  ];
+  var lbl={ok:"Instrumento listo",warn:"Borrador escrito",crit:"Ruta crítica",idle:"Sin empezar"};
+  var box=document.getElementById("meters");
+  S.forEach(function(s,i){
+    var d=document.createElement("div");
+    d.className="ch"; d.setAttribute("data-s",s[3]); d.tabIndex=0;
+    d.innerHTML='<div class="ch__tip">§'+s[0]+' · '+s[1]+' — '+lbl[s[3]]+'</div>'+
+                '<div class="ch__bar" style="height:'+Math.max(s[2],4)+'%;animation-delay:'+(i*22)+'ms"></div>'+
+                '<div class="ch__lab">'+s[0]+'</div>';
+    box.appendChild(d);
+  });
+})();
+</script>
