@@ -103,6 +103,15 @@ create trigger djs_updated_at
 alter table public.djs       enable row level security;
 alter table public.contactos enable row level security;
 
+-- ── service_role ───────────────────────────────────────────────────
+-- Es el rol con el que escribe la app desde el servidor. Supabase suele
+-- otorgarle permisos por defecto, pero se hace explícito: si los
+-- defaults cambian o el esquema se aplica en otra instancia, la app
+-- tiene que seguir funcionando.
+
+grant all on public.djs       to service_role;
+grant all on public.contactos to service_role;
+
 -- ── djs ────────────────────────────────────────────────────────────
 
 -- Se parte de cero y se otorga solo lo público, columna por columna.
@@ -147,7 +156,7 @@ with (security_invoker = true) as
   from public.djs
   where estado = 'publicado';
 
-grant select on public.djs_publicos to anon, authenticated;
+grant select on public.djs_publicos to anon, authenticated, service_role;
 
 -- ═══════════════════════════════════════════════════════════════════
 -- Comprobaciones

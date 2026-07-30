@@ -77,7 +77,12 @@ La app habla con una interfaz (`src/lib/db/index.ts`) que tiene dos
 implementaciones. **Conectar Supabase no toca ni una página.**
 
 1. Crear un proyecto en Supabase.
-2. Pegar `supabase/schema.sql` entero en el SQL Editor y ejecutar.
+2. Armar las tablas con un comando:
+
+```bash
+npm run instalar-base -- "postgresql://postgres:CLAVE@db.xxxx.supabase.co:5432/postgres"
+```
+
 3. Copiar `.env.example` a `.env.local` y completar:
 
 ```
@@ -189,7 +194,8 @@ src/
     ├── validar.ts          validación del servidor
     └── types.ts
 supabase/schema.sql         tablas, índices, RLS y permisos por columna
-scripts/verificar-supabase.mjs  chequea que la base quedó bien cerrada
+scripts/instalar-base.mjs   aplica el esquema y lo verifica, de una
+scripts/verificar-supabase.mjs  chequea la base desde afuera, con la anon key
 tests/flujos.mjs            recorrido de los 16 flujos
 DEPLOY.md                   guía de Supabase + Vercel
 ```

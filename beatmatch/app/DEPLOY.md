@@ -7,6 +7,15 @@ Tiempo real: unos 25 minutos.
 
 ---
 
+> **Lo que ya está probado:** el esquema se ejecutó contra un PostgreSQL 16
+> real y se verificó que el rol `anon` —el que viaja al navegador— sea
+> rechazado al intentar leer `email`, `edit_token`, la tabla completa y
+> los contactos, y al intentar insertar, actualizar o borrar. También que
+> `service_role` sí pueda escribir, que el trigger de `updated_at` corra y
+> que borrar un DJ arrastre sus contactos.
+
+---
+
 ## Paso 1 · La base de datos (Supabase)
 
 1. Entrá a [supabase.com](https://supabase.com) → **New project**.
@@ -17,12 +26,29 @@ Tiempo real: unos 25 minutos.
    - **Region**: `South America (São Paulo)` — es la más cercana, y son
      ~150 ms menos en cada consulta que si elegís una de EE.UU.
 3. Esperá a que termine de crearse (1–2 min).
-4. Barra izquierda → **SQL Editor** → **New query**.
-5. Abrí `supabase/schema.sql`, copiá **todo** el archivo, pegalo y
-   **Run**.
 
-Tiene que decir *Success. No rows returned*. Si da error, no sigas: copiá
-el mensaje y lo miramos.
+### Armar las tablas — un solo comando
+
+**Project Settings** → **Database** → **Connection string** → **URI**.
+Copiala y reemplazá `[YOUR-PASSWORD]` por la contraseña del paso 2.
+
+```bash
+cd beatmatch/app
+npm install
+npm run instalar-base -- "postgresql://postgres:TU-CLAVE@db.xxxx.supabase.co:5432/postgres"
+```
+
+Aplica el esquema entero y después comprueba que haya quedado bien
+cerrado. Tiene que terminar en **"La base quedó lista"**. Es seguro
+correrlo más de una vez.
+
+<details>
+<summary>Si preferís hacerlo a mano</summary>
+
+Barra izquierda → **SQL Editor** → **New query** → pegá todo
+`supabase/schema.sql` → **Run**. Tiene que decir *Success. No rows
+returned*.
+</details>
 
 ### Copiar las credenciales
 
@@ -39,23 +65,21 @@ cosas:
 > Nunca la pegues en un chat, en un issue, ni en el código. Solo va en las
 > variables de entorno de Vercel y en tu `.env.local`.
 
-### Comprobar que quedó bien cerrada
+### Comprobar desde afuera
 
-En tu máquina:
+`instalar-base` revisa la base por dentro. Este otro la revisa **como lo
+haría un atacante**, usando la clave pública contra la API:
 
 ```bash
-cd beatmatch/app
 cp .env.example .env.local     # completá las tres claves
-npm install
 npm run verificar
 ```
 
-El script comprueba que las tablas existan y —lo importante— que la clave
-pública **no pueda leer el mail ni el `edit_token` de los DJs**. Con ese
-token, cualquiera podría editar el perfil de cualquiera.
+Comprueba que la clave pública **no pueda leer el mail ni el `edit_token`
+de los DJs**. Con ese token, cualquiera podría editar el perfil de
+cualquiera.
 
-Tienen que pasar las 10 comprobaciones. Si alguna falla, volvé a ejecutar
-`schema.sql` completo.
+Tienen que pasar las 10 comprobaciones.
 
 ---
 
