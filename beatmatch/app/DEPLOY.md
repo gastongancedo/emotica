@@ -27,7 +27,28 @@ Tiempo real: unos 25 minutos.
      ~150 ms menos en cada consulta que si elegís una de EE.UU.
 3. Esperá a que termine de crearse (1–2 min).
 
-### Armar las tablas — un solo comando
+### Armar las tablas
+
+**Si es tu primera vez con Supabase, usá esta vía.** No hace falta
+instalar nada ni saber SQL: se copia un texto y se aprieta un botón.
+
+4. En la barra izquierda, **SQL Editor** (ícono de base de datos).
+5. **New query**.
+6. Abrí [`supabase/schema.sql`](./supabase/schema.sql) en GitHub, botón
+   **Copy raw file**, y pegalo entero en el editor.
+7. **Run** (o `Ctrl`/`Cmd` + `Enter`).
+
+Tiene que aparecer **Success. No rows returned**. Eso significa que creó
+las tablas y no devolvió filas, que es lo correcto: la base arranca
+vacía.
+
+Si sale algo en rojo, no sigas: copiame el mensaje.
+
+Para confirmar que quedó, andá a **Table Editor** en la barra izquierda:
+tenés que ver dos tablas, `djs` y `contactos`.
+
+<details>
+<summary>Alternativa por terminal, si ya tenés el repo clonado</summary>
 
 **Project Settings** → **Database** → **Connection string** → **URI**.
 Copiala y reemplazá `[YOUR-PASSWORD]` por la contraseña del paso 2.
@@ -38,28 +59,27 @@ npm install
 npm run instalar-base -- "postgresql://postgres:TU-CLAVE@db.xxxx.supabase.co:5432/postgres"
 ```
 
-Aplica el esquema entero y después comprueba que haya quedado bien
-cerrado. Tiene que terminar en **"La base quedó lista"**. Es seguro
-correrlo más de una vez.
-
-<details>
-<summary>Si preferís hacerlo a mano</summary>
-
-Barra izquierda → **SQL Editor** → **New query** → pegá todo
-`supabase/schema.sql` → **Run**. Tiene que decir *Success. No rows
-returned*.
+Hace lo mismo y además verifica el resultado. Es seguro correrlo más de
+una vez.
 </details>
 
 ### Copiar las credenciales
 
-**Project Settings** (el engranaje) → **API Keys**. Vas a necesitar tres
-cosas:
+**Project Settings** (el engranaje, abajo a la izquierda) → buscá la
+sección **API** o **API Keys**. Vas a necesitar tres cosas:
 
-| Dónde | Qué |
+| Qué buscar | Cómo se ve |
 |---|---|
-| Project URL | `https://xxxxx.supabase.co` |
-| `anon` `public` | clave larga que empieza con `eyJ…` |
-| `service_role` `secret` | otra clave `eyJ…`, está oculta detrás de *Reveal* |
+| **Project URL** | `https://xxxxx.supabase.co` |
+| Clave pública — dice `anon` `public` (o *publishable*) | texto largo, suele empezar con `eyJ…` |
+| Clave secreta — dice `service_role` (o *secret*) | otra igual de larga, tapada detrás de un botón **Reveal** |
+
+Guardalas en un bloc de notas por ahora. Van a hacer falta en el Paso 2.
+
+> Supabase cambió los nombres de las claves en distintas versiones del
+> panel. Si ves *publishable* y *secret* en vez de *anon* y
+> *service_role*, es lo mismo: la primera es la pública, la segunda es la
+> que nunca se comparte.
 
 > 🔴 **La `service_role` saltea todas las reglas de seguridad de la base.**
 > Nunca la pegues en un chat, en un issue, ni en el código. Solo va en las
